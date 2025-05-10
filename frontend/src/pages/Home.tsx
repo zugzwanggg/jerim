@@ -2,7 +2,8 @@ import { HomeIcon, Trees } from "lucide-react"
 
 const Home = () => {
   return (
-    <div className="relative bg-dark-secondary md:bg-none pt-32 md:pt-20 px-4 md:px-6 min-h-screen z-20">
+    <>
+      <div className="relative bg-dark-secondary md:bg-none pt-32 md:pt-20 px-4 md:px-6 min-h-screen z-20">
       <img src="/home.png" alt="home-bg" className="hidden md:block -z-10 absolute top-0 left-0 w-full h-full object-cover" />
       
       <div className="max-w-lg ml-0 md:ml-28 mt-20 md:mt-28">
@@ -35,9 +36,10 @@ const Home = () => {
       <img 
         src="/screen.webp" 
         alt="screen" 
-        className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-1/2 max-w-2xl object-contain"
+        className="hidden lg:block absolute -right-0 top-1/2 -translate-y-1/2 w-1/2 max-w-2xl object-contain"
       />
     </div>
+    </>
   )
 }
 
