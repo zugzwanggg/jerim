@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useWindowSize } from "../hooks/useWindowSize";
 import SearchBar from "./SearchBar";
-import { Avatar } from "./ui/avatar";
 import { Link } from 'react-router-dom';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from './ui/navigation-menu';
-import { Map, Trophy, Users } from 'lucide-react';
+import { Map, Trash2, Trophy } from 'lucide-react';
+import Profile from './Profile';
 
 const links = [
   {
@@ -20,10 +20,10 @@ const links = [
     description: 'Track your progress'
   },
   {
-    label: 'Volunteers',
-    href: '/volunteers',
-    icon: <Users size={20} />,
-    description: 'Find your nearest volunteer group'
+    label: 'Report',
+    href: '/report',
+    icon: <Trash2 size={20} />,
+    description: 'Send location of dirty areas'
   },
 ]
 
@@ -31,7 +31,7 @@ const Navbar = () => {
   const { isTablet } = useWindowSize();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const isLoggedin = false;
+  const isLoggedin = true;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,11 +106,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
           {isLoggedin ? (
-            <Avatar className="h-8 w-8">
-              <div className="h-full w-full bg-primary/20 rounded-full flex items-center justify-center">
-                <span className="text-primary text-sm">U</span>
-              </div>
-            </Avatar>
+            <Profile />
           ) : (
             <Link to={`/auth/signin`} className={`font-semibold px-4 py-2 rounded-full transition-all duration-300 ${
               isScrolled 

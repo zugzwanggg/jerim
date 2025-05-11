@@ -7,7 +7,9 @@ import Signin from "./pages/auth/Signin"
 import { useEffect } from "react"
 import Map from "./pages/Map"
 import Leaderboard from "./pages/Leaderboard"
-import Volunteers from "./pages/Volunteers"
+import ReportPage from "./pages/ReportPage"
+import ProfilePage from "./pages/ProfilePage"
+import SearchPage from "./pages/SearchPage"
 
 function App() {
 
@@ -22,7 +24,10 @@ function App() {
           <Route index element={<Home />}/>
           <Route path="/map" element={<Map />}/>
           <Route path="/leaderboard" element={<Leaderboard />}/>
-          <Route path="/volunteers" element={<Volunteers />}/>
+          <Route path="/report" element={<ReportPage />}/>
+          <Route path="/search" element={<SearchPage />}/>
+
+          <Route path="/profile/:id" element={<ProfilePage />}/>
         </Route>
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="register" element={<Register />}/>
