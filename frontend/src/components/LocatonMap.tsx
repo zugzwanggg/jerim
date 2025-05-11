@@ -4,11 +4,22 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Locate, Loader2, XCircle, MapPin } from 'lucide-react';
 
+// Fix leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom red marker icon
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 interface Coordinates {
@@ -74,6 +85,7 @@ const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigatio
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPolygon, setCurrentPolygon] = useState<L.LatLng[]>([]);
   const [dirtyAreas, setDirtyAreas] = useState<L.LatLng[][]>([]);
+  const [visibleAreas, setVisibleAreas] = useState<{ [key: number]: boolean }>({});
 
   const handleLocate = useCallback(() => {
     if (!mapInstance) return;
@@ -100,6 +112,13 @@ const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigatio
     setIsDrawing(false);
   }, [currentPolygon, onAreaSelect]);
 
+  const toggleArea = useCallback((index: number) => {
+    setVisibleAreas(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  }, []);
+
   // Convert coordinates to LatLng objects
   const predefinedLatLngs = predefinedAreas.map(area => 
     area.map(coord => new L.LatLng(coord.lat, coord.lng))
@@ -121,23 +140,42 @@ const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigatio
         <LocationMarker />
 
         {/* Predefined areas */}
-        {predefinedLatLngs.map((area, index) => (
-          <Polygon
-            key={`predefined-${index}`}
-            positions={area}
-            pathOptions={{
-              color: '#dc2626',
-              fillColor: '#f87171',
-              fillOpacity: 0.4,
-              weight: 2
-            }}
-          >
-            <Popup className="font-medium">
-              🚯 Dirty Area #{index + 1}<br />
-              Last updated: {new Date().toLocaleDateString()}
-            </Popup>
-          </Polygon>
-        ))}
+        {predefinedLatLngs.map((area, index) => {
+          const center = area.reduce((acc, point) => {
+            return {
+              lat: acc.lat + point.lat / area.length,
+              lng: acc.lng + point.lng / area.length
+            };
+          }, { lat: 0, lng: 0 });
+
+          return (
+            <div key={`area-${index}`}>
+              <Marker 
+                position={center} 
+                icon={redIcon}
+                eventHandlers={{
+                  click: () => toggleArea(index)
+                }}
+              >
+                <Popup className="font-medium">
+                  🚯 Dirty Area #{index + 1}<br />
+                  Click to {visibleAreas[index] ? 'hide' : 'show'} area
+                </Popup>
+              </Marker>
+              {visibleAreas[index] && (
+                <Polygon
+                  positions={area}
+                  pathOptions={{
+                    color: '#dc2626',
+                    fillColor: '#f87171',
+                    fillOpacity: 0.4,
+                    weight: 2
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
 
         {/* Existing dirty areas */}
         {dirtyAreas.map((area, index) => (
