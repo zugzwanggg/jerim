@@ -134,3 +134,17 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const logout = async (req, res) => {
+  return res
+    .cookie("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: new Date(0),
+      // sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    })
+    .status(200)
+    .send({
+      message: "Logged out succesfully",
+    });
+};
