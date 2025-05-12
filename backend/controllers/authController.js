@@ -56,7 +56,7 @@ export const register = async (req, res) => {
 
     const newUser = await db.query(
       "INSERT INTO users (email, username, password, avatar) VALUES ($1, $2, $3, $4) RETURNING id, email, username, avatar, created_at",
-      [email, password, hashedPassword, defaultAvatar]
+      [email, username, hashedPassword, defaultAvatar]
     );
 
     const payload = newUser.rows[0];
