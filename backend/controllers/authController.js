@@ -20,13 +20,13 @@ export const register = async (req, res) => {
     }
 
     const checkIfUserExists = await db.query(
-      "SELECT * FROM users WHERE username=$1 OR email=$2",
-      [username, email]
+      "SELECT * FROM users WHERE OR email=$1",
+      [email]
     );
 
     if (checkIfUserExists.rows.length > 0) {
       return res.status(400).send({
-        error_message: "User with this email or username already exists",
+        error_message: "This email is already in use",
       });
     }
 
