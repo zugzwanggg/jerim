@@ -7,6 +7,8 @@ const JWT_SECRET = process.env.JWT_SECRET
   ? process.env.JWT_SECRET
   : "default_secret_123";
 
+const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
 export const register = async (req, res) => {
   try {
     const { email, username, password, repeat_password } = req.body;
@@ -60,7 +62,6 @@ export const register = async (req, res) => {
     const payload = newUser.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
 
-    const sevenDays = 7 * 24 * 60 * 60 * 1000;
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -75,6 +76,60 @@ export const register = async (req, res) => {
   } catch (error) {
     console.log(`Error at register(): ${error}`);
     res.status(500).send({
+      error,
+    });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const { user_data, password } = req.body;
+
+    if (!user_data || !password) {
+      return res.status(400).send({
+        error_message: "All fields must be provided",
+      });
+    }
+
+    const checkIfUserExists = await db.query(
+      "SELECT * FROM users WHERE username=$1 OR email=$1",
+      [user_data]
+    );
+
+    if (checkIfUserExists.rows.length <= 0) {
+      return res.status(401).send({
+        error_message: "Incorrect username, email or password",
+      });
+    }
+
+    const checkUserPassword = await bcryptjs.compare(
+      password,
+      checkIfUserExists.rows[0].password
+    );
+
+    if (!checkUserPassword) {
+      return res.status(401).send({
+        error_message: "Incorrect username, email or password",
+      });
+    }
+
+    const payload = checkIfUserExists.rows[0];
+    const token = jwt.sign(payload, JWT_SECRET);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: sevenDays,
+      // sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    });
+
+    return res.status(200).send({
+      message: "Logged in succesfully",
+      user_id: payload.id,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
       error,
     });
   }
