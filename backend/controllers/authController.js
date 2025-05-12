@@ -1,11 +1,76 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import bcryptjs from "bcryptjs";
 import { db } from "../db.js";
+import validator from "validator";
+
+const JWT_SECRET = process.env.JWT_SECRET
+  ? process.env.JWT_SECRET
+  : "default_secret_123";
 
 export const register = async (req, res) => {
   try {
-    res.status(200).send({
-      message: "Hi",
+    const { email, username, password, repeat_password } = req.body;
+
+    if (!email || !username || !password || !repeat_password) {
+      return res.status(400).send({
+        error_message: "All fields must be provided",
+      });
+    }
+
+    const checkIfUserExists = await db.query(
+      "SELECT * FROM users WHERE username=$1 OR email=$2",
+      [username, email]
+    );
+
+    if (checkIfUserExists.rows.length > 0) {
+      return res.status(400).send({
+        error_message: "User with this email or username already exists",
+      });
+    }
+
+    if (password !== repeat_password) {
+      return res.status(400).send({
+        error_message: "password and repeat_password are not matching",
+      });
+    }
+
+    const isPasswordStrong = validator.isStrongPassword(password, {
+      minLength: 6,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    });
+
+    if (!isPasswordStrong) {
+      return res.status(400).send({
+        error_message: "Weak Password",
+      });
+    }
+
+    const genSalt = await bcryptjs.genSalt();
+    const hashedPassword = await bcryptjs.hash(password, genSalt);
+
+    const defaultAvatar = `https://res.cloudinary.com/dtsdbjvgg/image/upload/t_default-avatar/v1745933665/ChatGPT_Image_29_%D0%B0%D0%BF%D1%80._2025_%D0%B3._18_35_39_o3vfxl.png`;
+
+    const newUser = await db.query(
+      "INSERT INTO users (email, username, password, avatar) VALUES ($1, $2, $3, $4) RETURNING id, email, username, avatar, created_at",
+      [email, password, hashedPassword, defaultAvatar]
+    );
+
+    const payload = newUser.rows[0];
+    const token = jwt.sign(payload, JWT_SECRET);
+
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: sevenDays,
+      // sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    });
+
+    return res.status(200).send({
+      message: "User created succesfully",
+      user_id: payload.id,
     });
   } catch (error) {
     console.log(`Error at register(): ${error}`);
