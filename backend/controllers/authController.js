@@ -75,7 +75,7 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.log(`Error at register(): ${error}`);
-    res.status(500).send({
+    return res.status(500).send({
       error,
     });
   }
@@ -128,7 +128,7 @@ export const login = async (req, res) => {
       user_id: payload.id,
     });
   } catch (error) {
-    console.log(error);
+    console.log(`Error at login(): ${error}`);
     return res.status(500).send({
       error,
     });
@@ -147,4 +147,28 @@ export const logout = async (req, res) => {
     .send({
       message: "Logged out succesfully",
     });
+};
+
+export const isLogged = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).send({
+        isLogged: false,
+      });
+    }
+
+    const decoded = jwt.decode(token, JWT_SECRET);
+
+    return res.status(200).send({
+      isLogged: true,
+      user: decoded,
+    });
+  } catch (error) {
+    console.log(`Error at isLogged(): ${error}`);
+    return res.status(500).send({
+      error,
+    });
+  }
 };
