@@ -1,5 +1,18 @@
+import axios from "axios";
 import { db } from "../db.js";
 import cloudinary from "../utils/cloudinary.js";
+
+export const getNearestCityData = async (req,res) => {
+  try {
+    const key = process.env.AIRVISUAL_API_KEY;
+    const result = await axios.get('http://api.airvisual.com/v2/nearest_city?key='+key);
+
+    res.status(200).json(result.data)
+  } catch (error) {
+    console.log('Error at getNearestCityData', error);
+    res.status(500).send(error)
+  }
+}
 
 export const getReports = async (req,res) => {
   try {
