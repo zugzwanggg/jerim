@@ -159,7 +159,7 @@ export const isLogged = async (req, res) => {
       });
     }
 
-    const decoded = jwt.decode(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     return res.status(200).send({
       isLogged: true,
