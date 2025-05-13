@@ -34,3 +34,12 @@ export const getTreePlantLocation = async (req,res) => {
     res.status(500).send(error)
   }
 }
+
+
+export const sendReport = async (req,res) => {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
