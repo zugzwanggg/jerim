@@ -66,7 +66,7 @@ export const register = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: sevenDays,
-      // sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
     });
 
     return res.status(200).send({
@@ -120,7 +120,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: sevenDays,
-      // sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
     });
 
     return res.status(200).send({
@@ -141,7 +141,7 @@ export const logout = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: new Date(0),
-      // sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
     })
     .status(200)
     .send({
