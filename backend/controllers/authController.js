@@ -20,7 +20,7 @@ export const register = async (req, res) => {
     }
 
     const checkIfUserExists = await db.query(
-      "SELECT * FROM users WHERE OR email=$1",
+      "SELECT * FROM users WHERE email=$1",
       [email]
     );
 

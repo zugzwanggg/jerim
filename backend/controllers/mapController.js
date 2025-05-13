@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const getReports = async (req,res) => {
   try {
@@ -70,7 +71,7 @@ export const pickLitter = async (req,res) => {
   try {
     const {id} = req.user;
     const {lat, lng, brand, description} = req.body;
-    const image = req.files;
+    const image = req.file;
     if (!lat || !lng || !brand) {
       return res.status(400).json({
         message: "Fill all the fields"
@@ -83,11 +84,27 @@ export const pickLitter = async (req,res) => {
       })
     }
 
+    const publicId = `user_${id}_litter_${lat}_${lng}`;
+
+    let imageUrl;
+    await cloudinary.uploader.upload(req.file.path,
+      {
+        folder: 'litters',
+        publicId,
+        overwrite: true
+      },
+      async (err, res) => {
+        if (err) return res?.status(500).json({ error: 'Cloudinary upload failed' });
+
+        imageUrl = res?.secure_url;
+      }
+    )
+
     await db.query(
       `INSERT INTO picked_litters (user_id, lat, lng, image, brand, description)
-       VALUES ($1, $2, $3, $3, $5, $6)
-      `, [id, lat, lng, image, brand, description]
-    );
+       VALUES ($1, $2, $3, $4, $5, $6)
+      `, [id, lat, lng, imageUrl, brand, description]
+    )
 
     res
     .status(200)
@@ -106,7 +123,7 @@ export const plantATree = async (req,res) => {
 
     const {id} = req.user;
     const {lat, lng, comment} = req.body;
-    const image = req.files;
+    const image = req.file;
     if (!lat || !lng) {
       return res.status(400).json({
         message: "Fill all the fields"
@@ -118,11 +135,27 @@ export const plantATree = async (req,res) => {
         message: "Image must be added"
       })
     }
+    const publicId = `user_${id}_tree_${lat}_${lng}`;
+
+    let imageUrl;
+    await cloudinary.uploader.upload(req.file.path,
+      {
+        folder: 'trees',
+        publicId,
+        overwrite: true
+      },
+      async (err, res) => {
+        if (err) return res?.status(500).json({ error: 'Cloudinary upload failed' });
+
+        imageUrl = res?.secure_url;
+      }
+    )
+
 
     await db.query(
       `INSERT INTO picked_litters (user_id, lat, lng, image, comment)
        VALUES ($1, $2, $3, $3, $5)
-      `, [id, lat, lng, image, comment]
+      `, [id, lat, lng, imageUrl, comment]
     );
 
     res
@@ -130,7 +163,7 @@ export const plantATree = async (req,res) => {
     .json({
       message: "Succesfully planted"
     })
-    
+
   } catch (error) {
     console.log('Error at plantATree', error);
     res.status(500).send(error)
