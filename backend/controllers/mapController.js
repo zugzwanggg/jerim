@@ -38,8 +38,101 @@ export const getTreePlantLocation = async (req,res) => {
 
 export const sendReport = async (req,res) => {
   try {
+
+    const {id} = req.user;
+    const {lat, lng, comment} = req.body;
+
+    if (!lat || !lng) {
+      return res.status(400).json({
+        message: "Lat and lng cannot be empty"
+      })
+    }
+
+    await db.query(
+      'INSERT INTO reports (user_id, lat, lng, comment) VALUES ($1, $2, $3, $4)',
+      [id, lat, lng, comment]
+    )
+
+      res
+      .status(200)
+      .json({
+        message: "Report submited succesfully"
+      })
     
   } catch (error) {
+    console.log('Error at sendReport', error);
+    res.status(500).send(error)
+  }
+}
+
+
+export const pickLitter = async (req,res) => {
+  try {
+    const {id} = req.user;
+    const {lat, lng, brand, description} = req.body;
+    const image = req.files;
+    if (!lat || !lng || !brand) {
+      return res.status(400).json({
+        message: "Fill all the fields"
+      })
+    }
+
+    if (!image) {
+      return res.status(400).json({
+        message: "Image must be added"
+      })
+    }
+
+    await db.query(
+      `INSERT INTO picked_litters (user_id, lat, lng, image, brand, description)
+       VALUES ($1, $2, $3, $3, $5, $6)
+      `, [id, lat, lng, image, brand, description]
+    );
+
+    res
+    .status(200)
+    .json({
+      message: "Succesfully submited"
+    })
+
+  } catch (error) {
+    console.log('Error at pickLitter', error);
+    res.status(500).send(error)
+  }
+}
+
+export const plantATree = async (req,res) => {
+  try {
+
+    const {id} = req.user;
+    const {lat, lng, comment} = req.body;
+    const image = req.files;
+    if (!lat || !lng) {
+      return res.status(400).json({
+        message: "Fill all the fields"
+      })
+    }
+
+    if (!image) {
+      return res.status(400).json({
+        message: "Image must be added"
+      })
+    }
+
+    await db.query(
+      `INSERT INTO picked_litters (user_id, lat, lng, image, comment)
+       VALUES ($1, $2, $3, $3, $5)
+      `, [id, lat, lng, image, comment]
+    );
+
+    res
+    .status(200)
+    .json({
+      message: "Succesfully planted"
+    })
     
+  } catch (error) {
+    console.log('Error at plantATree', error);
+    res.status(500).send(error)
   }
 }
