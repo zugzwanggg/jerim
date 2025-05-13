@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const getUserByID = async (req, res) => {
   try {
@@ -58,6 +59,56 @@ export const editUsername = async (req, res) => {
   } catch (error) {
     console.log(`Error at editUsername(): ${error}`);
     return res.status(500).send({
+      error,
+    });
+  }
+};
+
+export const editAvatar = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const file = req.file;
+    const { avatar } = req.user;
+
+    if (!file) {
+      return res.status(400).send({
+        message: "Image file must be provided",
+      });
+    }
+
+    const publicId = `user_${user_id}_avatar`;
+
+    if (avatar !== null) {
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    await cloudinary.uploader.upload(
+      req.file.path,
+      {
+        folder: "avatars",
+        public_id: publicId,
+        overwrite: true,
+      },
+      async (err, res) => {
+        if (err) {
+          return res?.status(500).send({
+            error_message: "Cloudinary upload failed",
+          });
+        }
+
+        await db.query("UPDATE users SET avatar=$1 WHERE id=$2", [
+          res?.secure_url,
+          user_id,
+        ]);
+      }
+    );
+
+    return res.status(200).send({
+      message: "Succesfully updated user avatar",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
       error,
     });
   }
