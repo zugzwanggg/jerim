@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from './ui/navigation-menu';
 import { Map, Trash2, Trophy } from 'lucide-react';
 import Profile from './Profile';
+import { useAppSelector } from '@/hooks/hooks';
 
 const links = [
   {
@@ -31,7 +32,7 @@ const Navbar = () => {
   const { isTablet } = useWindowSize();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const isLoggedin = true;
+  const {isLogged} = useAppSelector((state)=>state.user);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,7 +106,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {isLoggedin ? (
+          {isLogged ? (
             <Profile />
           ) : (
             <Link to={`/auth/signin`} className={`font-semibold px-4 py-2 rounded-full transition-all duration-300 ${

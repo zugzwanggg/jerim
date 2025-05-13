@@ -1,6 +1,7 @@
+import axios from "axios";
 import { ArrowLeft, Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link} from "react-router-dom";
 // import toast from "react-hot-toast";
 
 const Signin = () => {
@@ -19,7 +20,18 @@ const Signin = () => {
 
     const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(formData)
+        try {
+
+          await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/login`, {
+            user_data: formData.email,
+            password: formData.password
+          })
+
+          window.location.reload();
+          
+        } catch (error) {
+          console.log(error);
+        }
     };
 
     return (
@@ -33,7 +45,7 @@ const Signin = () => {
                     <h2 className="text-xl font-semibold text-gray-800">Sign in to your account</h2>
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form className="space-y-4 text-black" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                             Email

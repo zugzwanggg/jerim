@@ -2,6 +2,7 @@ import { ArrowLeft, Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -27,20 +28,21 @@ const Register = () => {
             toast.error("Passwords do not match");
             return;
         }
-        console.log(formData)
-        // try {
-        //   await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/register`, {email: formData.email, username: formData.name, password: formData.password, repPassword: formData.confirmPassword});
-        //   window.location.reload();
-        // } catch (err) {
-        //     let errorMessage
+        try {
+          await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/register`, {email: formData.email, username: formData.name, password: formData.password, repeat_password: formData.confirmPassword});
+          window.location.reload();
+        } catch (err) {
+          console.log(err);
+          
+            let errorMessage
 
-        //     if (axios.isAxiosError(err)) {
-        //         errorMessage = err.response?.data?.message;
-        //     } else if (err instanceof Error) {
-        //         errorMessage = err.message
-        //     }
-        //     toast.error(errorMessage)
-        // }
+            if (axios.isAxiosError(err)) {
+                errorMessage = err.response?.data?.message;
+            } else if (err instanceof Error) {
+                errorMessage = err.message
+            }
+            toast.error(errorMessage)
+        }
     };
 
     return (
@@ -54,7 +56,7 @@ const Register = () => {
                     <h2 className="text-xl font-semibold text-gray-800">Register with Email</h2>
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form className="space-y-4 text-black" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                             Email

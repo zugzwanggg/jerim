@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import Layout from "./Layout"
 import Home from "./pages/Home"
 import Register from "./pages/auth/Register"
@@ -10,10 +10,18 @@ import Leaderboard from "./pages/Leaderboard"
 import ReportPage from "./pages/ReportPage"
 import ProfilePage from "./pages/ProfilePage"
 import SearchPage from "./pages/SearchPage"
+import { fetchUserIsLogged } from "./features/userSlice/userSlice"
+import { useAppDispatch, useAppSelector } from "./hooks/hooks"
+import axios from "axios"
+
+axios.defaults.withCredentials = true;
 
 function App() {
+  const dispatch = useAppDispatch();
+  const {isLogged} = useAppSelector((state)=>state.user);
 
   useEffect(() => {
+    dispatch(fetchUserIsLogged());
     document.body.classList.add('dark');
   }, [])
 
@@ -29,7 +37,7 @@ function App() {
 
           <Route path="/profile/:id" element={<ProfilePage />}/>
         </Route>
-        <Route path="/auth" element={<AuthLayout />}>
+        <Route path="/auth" element={isLogged ? <Navigate to={'/'}/> : <AuthLayout />}>
           <Route path="register" element={<Register />}/>
           <Route path="signin" element={<Signin />}/>
         </Route>
