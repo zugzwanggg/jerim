@@ -2,17 +2,17 @@ import MapWithControls from "@/components/LocatonMap"
 import axios from "axios";
 import { Leaf, Info } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 const Map = () => {
-  // Example coordinates, we will get this from the backend)
+  const { isMobile } = useWindowSize();
   const [reports, setReports] = useState([]);
 
   const getReports = async () => {
     try {
-
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/reports`);
       setReports(res.data);
-      
+      console.log(res.data)
     } catch (error) {
       console.log(error);
     }
@@ -33,7 +33,7 @@ const Map = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="bg-dark-secondary rounded-xl p-4 shadow-lg">
-              <div className="h-[600px] rounded-lg overflow-hidden">
+              <div className={`${isMobile ? 'h-[400px]' : 'h-[600px]'} rounded-lg overflow-hidden`}>
                 <MapWithControls predefinedLocations={reports} />
               </div>
             </div>

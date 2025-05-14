@@ -1,8 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Locate, Loader2, XCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 // Fix leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -22,9 +25,13 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-interface Coordinates {
-  lat: number;
-  lng: number;
+export interface Coordinates {
+  id: number;
+  lat: string;
+  lng: string;
+  comment?: string;
+  user_id: number;
+  created_at?: string;
 }
 
 interface MapWithControlsProps {
@@ -67,6 +74,18 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<L.LatLng | null>(selectedLocation || null);
+  const [markers, setMarkers] = useState<Array<{
+    position: L.LatLng;
+    description?: string;
+    username?: string;
+    created_at?: string;
+    user_id: number;
+  }>>([]);
+
+  const ATYRAU_BOUNDS = L.latLngBounds(
+    L.latLng(47.0, 51.7),  
+    L.latLng(47.2, 52.0) 
+  );
 
   const handleLocate = useCallback(() => {
     if (!mapInstance) return;
@@ -81,12 +100,43 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
   }, [mapInstance]);
 
   const handleLocationSelect = useCallback((latlng: L.LatLng) => {
+    if (mode === 'report' && !ATYRAU_BOUNDS.contains(latlng)) {
+      toast.error('Please select a location within Atyrau city boundaries.');
+      return;
+    }
     setSelectedPoint(latlng);
     onLocationSelect?.(latlng);
-  }, [onLocationSelect]);
+  }, [onLocationSelect, mode]);
 
-  // Convert coordinates to LatLng objects
-  const predefinedMarkers = predefinedLocations.map(coord => new L.LatLng(coord.lat, coord.lng));
+  const getUser = async (id: number) => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}`);
+      return res.data.username; 
+    } catch (error) {
+      console.log(error);
+      return 'Unknown User';
+    }
+  }
+
+  useEffect(() => {
+    const fetchMarkerData = async () => {
+      const markersData = await Promise.all(
+        predefinedLocations.map(async (coord) => {
+          const username = coord.user_id ? await getUser(coord.user_id) : undefined;
+          return {
+            position: new L.LatLng(parseFloat(coord.lat), parseFloat(coord.lng)),
+            description: coord.comment,
+            username,
+            created_at: coord.created_at,
+            user_id: coord.user_id
+          };
+        })
+      );
+      setMarkers(markersData);
+    };
+
+    fetchMarkerData();
+  }, [predefinedLocations]);
 
   return (
     <div className="relative z-10 h-full w-full rounded-xl overflow-hidden border-2 border-gray-200">
@@ -96,6 +146,8 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
         scrollWheelZoom={true}
         className="h-full w-full"
         ref={setMapInstance}
+        maxBounds={ATYRAU_BOUNDS}
+        maxBoundsViscosity={1.0}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -104,28 +156,73 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
         <LocationMarker />
         <MapClickHandler onLocationSelect={handleLocationSelect} mode={mode} />
 
-        {/* Selected point in report mode */}
         {mode === 'report' && selectedPoint && (
           <Marker 
             position={selectedPoint}
             icon={redIcon}
           >
             <Popup className="font-medium">
-              🚯 Selected Location
+              <div className="p-1">
+                <p className="font-semibold text-gray-800">Selected Location</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Click "Submit Report" to report this area
+                </p>
+              </div>
             </Popup>
           </Marker>
         )}
 
-        {/* Predefined locations */}
-        {predefinedMarkers.map((location, index) => (
+        {markers.map((location, index) => (
           <Marker 
             key={`location-${index}`}
-            position={location}
+            position={location.position}
             icon={redIcon}
           >
             <Popup className="font-medium">
-              🚯 Dirty Area #{index + 1}<br />
-              Reported: {new Date().toLocaleDateString()}
+              <div className="p-1.5 md:p-2 min-w-[200px] md:min-w-[250px]">
+                <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-3 pb-1.5 md:pb-2 border-b border-gray-200">
+                  <div className="bg-red-100 p-1 md:p-1.5 rounded-lg">
+                    <span className="text-red-500 text-base md:text-lg">🚯</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800 text-sm md:text-base">Dirty Area #{index + 1}</h3>
+                    <p className="text-[10px] md:text-xs text-gray-500">Reported Issue</p>
+                  </div>
+                </div>
+
+                {location.description && (
+                  <div className="mb-2 md:mb-3">
+                    <p className="text-xs md:text-sm text-gray-600 bg-gray-50 p-1.5 md:p-2 rounded-lg">
+                      {location.description}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-1 md:gap-1.5 text-[10px] md:text-xs text-gray-500 bg-gray-50 p-1.5 md:p-2 rounded-lg">
+                  {location.username && (
+                    <div className="flex items-center gap-1 md:gap-1.5">
+                      <span className="font-medium text-gray-600">Reported by:</span>
+                      <Link to={`/profile/${location.user_id}`} className="text-blue-500 hover:underline">
+                        {location.username}
+                      </Link>
+                    </div>
+                  )}
+                  {location.created_at && (
+                    <div className="flex items-center gap-1 md:gap-1.5">
+                      <span className="font-medium text-gray-600">Date:</span>
+                      <span>
+                        {new Date(location.created_at).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </Popup>
           </Marker>
         ))}
