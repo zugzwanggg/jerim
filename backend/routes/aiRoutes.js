@@ -3,4 +3,4 @@ import { objectRecognition } from "../controllers/aiController.js";
 
 export const aiRouter = Router();
 
-aiRouter.patch("/ai/object_detection/:report_id", objectRecognition);
+aiRouter.get("/ai/:report_id/object_detection", objectRecognition);
