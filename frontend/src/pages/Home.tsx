@@ -1,7 +1,34 @@
 import { HomeIcon, Trees, Cloud, Wind, Thermometer, Droplets } from "lucide-react"
 import { atyrauLocationData } from "@/constants/mockData";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import type { IPollutionData, IWeatherData } from "@/types";
 
-const Home = () => {
+const Home = () => { 
+  const [city, setCity] = useState<string>('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
+  const [weather, setWeather] = useState<IWeatherData|null>(null)
+  const [pollution, setPollution] = useState<IPollutionData|null>(null);
+
+  const getWeather = async () => {
+    try {
+
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/city`);
+      console.log(res.data.data);
+      setPollution(res.data.data.current.pollution);
+      setWeather(res.data.data.current.weather);
+      setCity(res.data.data.city);
+      setState(res.data.data.state);
+      setCountry(res.data.data.country);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(()=> {
+    getWeather();
+  }, [])
 
   return (
     <>
@@ -49,9 +76,9 @@ const Home = () => {
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center gap-3">
                   <Cloud className="w-6 h-6 md:w-8 md:h-8 text-primary-green" />
-                  {atyrauLocationData.city}
+                  {city}
                 </h2>
-                <p className="text-gray-400 text-sm md:text-base">{atyrauLocationData.state}, {atyrauLocationData.country}</p>
+                <p className="text-gray-400 text-sm md:text-base">{state}, {country}</p>
               </div>
               <div className="mt-4 md:mt-0">
                 <p className="text-gray-400 text-sm">Last updated</p>
@@ -69,7 +96,7 @@ const Home = () => {
                   </div>
                   <span className="text-gray-400 text-sm md:text-base truncate">Temperature</span>
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-white">{atyrauLocationData.current.weather.tp}°C</p>
+                <p className="text-2xl md:text-3xl font-bold text-white">{weather?.tp}°C</p>
               </div>
               
               <div className="bg-gradient-to-br from-dark-secondary to-dark-color rounded-xl p-3 md:p-6 border border-white/5 hover:border-primary-green/50 transition-colors">
@@ -79,7 +106,7 @@ const Home = () => {
                   </div>
                   <span className="text-gray-400 text-sm md:text-base truncate">Humidity</span>
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-white">{atyrauLocationData.current.weather.hu}%</p>
+                <p className="text-2xl md:text-3xl font-bold text-white">{weather?.hu}%</p>
               </div>
               
               <div className="bg-gradient-to-br from-dark-secondary to-dark-color rounded-xl p-3 md:p-6 border border-white/5 hover:border-primary-green/50 transition-colors">
@@ -89,7 +116,7 @@ const Home = () => {
                   </div>
                   <span className="text-gray-400 text-sm md:text-base truncate">Wind Speed</span>
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-white">{atyrauLocationData.current.weather.ws} m/s</p>
+                <p className="text-2xl md:text-3xl font-bold text-white">{weather?.ws} m/s</p>
               </div>
               
               <div className="bg-gradient-to-br from-dark-secondary to-dark-color rounded-xl p-3 md:p-6 border border-white/5 hover:border-primary-green/50 transition-colors">
@@ -99,7 +126,7 @@ const Home = () => {
                   </div>
                   <span className="text-gray-400 text-sm md:text-base truncate">Air Quality</span>
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-white">AQI {atyrauLocationData.current.pollution.aqius}</p>
+                <p className="text-2xl md:text-3xl font-bold text-white">AQI {pollution?.aqius}</p>
               </div>
             </div>
 
@@ -109,11 +136,11 @@ const Home = () => {
                 <div className="space-y-2 md:space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm md:text-base">Pressure</span>
-                    <span className="text-white font-medium text-sm md:text-base">{atyrauLocationData.current.weather.pr} hPa</span>
+                    <span className="text-white font-medium text-sm md:text-base">{weather?.pr} hPa</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm md:text-base">Wind Direction</span>
-                    <span className="text-white font-medium text-sm md:text-base">{atyrauLocationData.current.weather.wd}°</span>
+                    <span className="text-white font-medium text-sm md:text-base">{weather?.wd}°</span>
                   </div>
                 </div>
               </div>
@@ -123,11 +150,11 @@ const Home = () => {
                 <div className="space-y-2 md:space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm md:text-base">Main Pollutant</span>
-                    <span className="text-white font-medium text-sm md:text-base">{atyrauLocationData.current.pollution.mainus}</span>
+                    <span className="text-white font-medium text-sm md:text-base">{pollution?.mainus}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm md:text-base">China AQI</span>
-                    <span className="text-white font-medium text-sm md:text-base">{atyrauLocationData.current.pollution.aqicn}</span>
+                    <span className="text-gray-400 text-sm md:text-base">{city} AQI</span>
+                    <span className="text-white font-medium text-sm md:text-base">{pollution?.aqicn}</span>
                   </div>
                 </div>
               </div>

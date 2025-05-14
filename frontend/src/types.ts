@@ -5,3 +5,21 @@ export interface IUser {
   email: string,
   created_at: Date
 }
+
+export interface IPollutionData {
+  ts: Date,
+  aqius: number,
+  mainus: string,
+  aqicn: number,
+  maincn: string
+}
+
+export interface IWeatherData {
+  ts: Date,
+  ic: string,
+  hu: number,
+  pr: number,
+  tp: number,
+  wd: number,
+  ws: number
+}
