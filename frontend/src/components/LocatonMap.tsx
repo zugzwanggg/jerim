@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Polygon } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Locate, Loader2, XCircle, MapPin } from 'lucide-react';
+import { Locate, Loader2, XCircle } from 'lucide-react';
 
 // Fix leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -28,9 +28,10 @@ interface Coordinates {
 }
 
 interface MapWithControlsProps {
-  onAreaSelect?: (coordinates: L.LatLng[]) => void;
-  predefinedAreas?: Coordinates[][];
+  onLocationSelect?: (coordinates: L.LatLng) => void;
+  predefinedLocations?: Coordinates[];
   mode?: 'navigation' | 'report';
+  selectedLocation?: L.LatLng | null;
 }
 
 const LocationMarker = () => {
@@ -51,41 +52,21 @@ const LocationMarker = () => {
   );
 };
 
-interface DrawingHandlerProps {
-  onAddPoint: (latlng: L.LatLng) => void;
-  onComplete: () => void;
-  currentPolygon: L.LatLng[];
-}
-
-const DrawingHandler = ({ onAddPoint, currentPolygon }: DrawingHandlerProps) => {
+const MapClickHandler = ({ onLocationSelect, mode }: { onLocationSelect?: (coordinates: L.LatLng) => void, mode: 'navigation' | 'report' }) => {
   useMapEvents({
     click(e) {
-      onAddPoint(e.latlng);
+      if (mode === 'report') {
+        onLocationSelect?.(e.latlng);
+      }
     }
   });
-
-  return (
-    <>
-      {currentPolygon.length > 0 && (
-        <Polygon 
-          positions={currentPolygon}
-          pathOptions={{
-            color: 'red',
-            fillOpacity: 0.2,
-          }}
-        />
-      )}
-    </>
-  );
+  return null;
 };
 
-const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigation' }: MapWithControlsProps) => {
+const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'navigation', selectedLocation }: MapWithControlsProps) => {
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [currentPolygon, setCurrentPolygon] = useState<L.LatLng[]>([]);
-  const [dirtyAreas, setDirtyAreas] = useState<L.LatLng[][]>([]);
-  const [visibleAreas, setVisibleAreas] = useState<{ [key: number]: boolean }>({});
+  const [selectedPoint, setSelectedPoint] = useState<L.LatLng | null>(selectedLocation || null);
 
   const handleLocate = useCallback(() => {
     if (!mapInstance) return;
@@ -99,30 +80,13 @@ const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigatio
     });
   }, [mapInstance]);
 
-  const handleAddPoint = useCallback((latlng: L.LatLng) => {
-    setCurrentPolygon((prev) => [...prev, latlng]);
-  }, []);
-
-  const handleCompleteDrawing = useCallback(() => {
-    if (currentPolygon.length >= 3) {
-      setDirtyAreas((prev) => [...prev, currentPolygon]);
-      onAreaSelect?.(currentPolygon);
-    }
-    setCurrentPolygon([]);
-    setIsDrawing(false);
-  }, [currentPolygon, onAreaSelect]);
-
-  const toggleArea = useCallback((index: number) => {
-    setVisibleAreas(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  }, []);
+  const handleLocationSelect = useCallback((latlng: L.LatLng) => {
+    setSelectedPoint(latlng);
+    onLocationSelect?.(latlng);
+  }, [onLocationSelect]);
 
   // Convert coordinates to LatLng objects
-  const predefinedLatLngs = predefinedAreas.map(area => 
-    area.map(coord => new L.LatLng(coord.lat, coord.lng))
-  );
+  const predefinedMarkers = predefinedLocations.map(coord => new L.LatLng(coord.lat, coord.lng));
 
   return (
     <div className="relative z-10 h-full w-full rounded-xl overflow-hidden border-2 border-gray-200">
@@ -138,72 +102,33 @@ const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigatio
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <LocationMarker />
+        <MapClickHandler onLocationSelect={handleLocationSelect} mode={mode} />
 
-        {/* Predefined areas */}
-        {predefinedLatLngs.map((area, index) => {
-          const center = area.reduce((acc, point) => {
-            return {
-              lat: acc.lat + point.lat / area.length,
-              lng: acc.lng + point.lng / area.length
-            };
-          }, { lat: 0, lng: 0 });
+        {/* Selected point in report mode */}
+        {mode === 'report' && selectedPoint && (
+          <Marker 
+            position={selectedPoint}
+            icon={redIcon}
+          >
+            <Popup className="font-medium">
+              🚯 Selected Location
+            </Popup>
+          </Marker>
+        )}
 
-          return (
-            <div key={`area-${index}`}>
-              <Marker 
-                position={center} 
-                icon={redIcon}
-                eventHandlers={{
-                  click: () => toggleArea(index)
-                }}
-              >
-                <Popup className="font-medium">
-                  🚯 Dirty Area #{index + 1}<br />
-                  Click to {visibleAreas[index] ? 'hide' : 'show'} area
-                </Popup>
-              </Marker>
-              {visibleAreas[index] && (
-                <Polygon
-                  positions={area}
-                  pathOptions={{
-                    color: '#dc2626',
-                    fillColor: '#f87171',
-                    fillOpacity: 0.4,
-                    weight: 2
-                  }}
-                />
-              )}
-            </div>
-          );
-        })}
-
-        {/* Existing dirty areas */}
-        {dirtyAreas.map((area, index) => (
-          <Polygon
-            key={`dirty-${index}`}
-            positions={area}
-            pathOptions={{
-              color: '#dc2626',
-              fillColor: '#f87171',
-              fillOpacity: 0.4,
-              weight: 2
-            }}
+        {/* Predefined locations */}
+        {predefinedMarkers.map((location, index) => (
+          <Marker 
+            key={`location-${index}`}
+            position={location}
+            icon={redIcon}
           >
             <Popup className="font-medium">
               🚯 Dirty Area #{index + 1}<br />
               Reported: {new Date().toLocaleDateString()}
             </Popup>
-          </Polygon>
+          </Marker>
         ))}
-
-        {/* Current drawing overlay */}
-        {isDrawing && (
-          <DrawingHandler
-            onAddPoint={handleAddPoint}
-            onComplete={handleCompleteDrawing}
-            currentPolygon={currentPolygon}
-          />
-        )}
       </MapContainer>
 
       {/* Locate button */}
@@ -226,36 +151,17 @@ const MapWithControls = ({ onAreaSelect, predefinedAreas = [], mode = 'navigatio
           )}
         </button>
 
-        {mode === 'report' && (
-          !isDrawing ? (
-            <button
-              onClick={() => setIsDrawing(true)}
-              className="bg-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-black"
-            >
-              <MapPin className="h-5 w-5 text-red-600" />
-              Mark Dirty Zone
-            </button>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={handleCompleteDrawing}
-                disabled={currentPolygon.length < 3}
-                className="bg-green-100 px-4 py-2 rounded-lg shadow-md hover:bg-green-200 transition-colors flex items-center gap-2 text-sm font-medium text-green-800"
-              >
-                Complete Area ({currentPolygon.length} points)
-              </button>
-              <button
-                onClick={() => {
-                  setCurrentPolygon([]);
-                  setIsDrawing(false);
-                }}
-                className="bg-red-100 px-4 py-2 rounded-lg shadow-md hover:bg-red-200 transition-colors flex items-center gap-2 text-sm font-medium text-red-800"
-              >
-                <XCircle className="h-5 w-5" />
-                Cancel
-              </button>
-            </div>
-          )
+        {mode === 'report' && selectedPoint && (
+          <button
+            onClick={() => {
+              setSelectedPoint(null);
+              onLocationSelect?.(selectedPoint);
+            }}
+            className="bg-red-100 px-4 py-2 rounded-lg shadow-md hover:bg-red-200 transition-colors flex items-center gap-2 text-sm font-medium text-red-800"
+          >
+            <XCircle className="h-5 w-5" />
+            Clear Selection
+          </button>
         )}
       </div>
     </div>

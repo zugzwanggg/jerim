@@ -3,7 +3,7 @@ import { useWindowSize } from "../hooks/useWindowSize";
 import SearchBar from "./SearchBar";
 import { Link } from 'react-router-dom';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from './ui/navigation-menu';
-import { Map, Trash2, Trophy } from 'lucide-react';
+import { LogIn, Map, Trash2, Trophy } from 'lucide-react';
 import Profile from './Profile';
 import { useAppSelector } from '@/hooks/hooks';
 
@@ -29,7 +29,7 @@ const links = [
 ]
 
 const Navbar = () => {
-  const { isTablet } = useWindowSize();
+  const { isTablet, isMobile } = useWindowSize();
   const [isScrolled, setIsScrolled] = useState(false);
 
   const {isLogged} = useAppSelector((state)=>state.user);
@@ -45,29 +45,29 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[1000]  ${
+    <nav className={`fixed top-0 left-0 right-0 z-[100]  ${
       isScrolled ? 'bg-dark-color shadow-md border-b border-zinc-500' : 'bg-transparent'
     }`}>
       <div className="h-16 px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to={`/`} className="flex items-center gap-2">
-            <img src="/Leaf.svg" alt="leaf" className='size-6' />
-            <span className={`text-xl font-bold transition-colors duration-300 ${
+            <img src="/Leaf.svg" alt="leaf" className='size-5 sm:size-6' />
+            <span className={`text-lg sm:text-xl font-bold transition-colors duration-300 ${
               isScrolled ? 'text-primary-green' : 'text-white'
             }`}>
               JERIM
             </span>
           </Link>
 
-          <NavigationMenu className=''>
+          <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className='bg-transparent border border-dark-color text-white'>
                   Getting Started
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className=''>
+                <NavigationMenuContent>
                   <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                    <li className="row-span-3">
+                    <li className="row-span-3 hidden md:block">
                       <NavigationMenuLink asChild>
                         <Link
                           className="flex h-full w-full select-none flex-col justify-center rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md hover:bg-muted/80 transition-colors"
@@ -85,17 +85,18 @@ const Navbar = () => {
                     </li>
                     <li className="flex flex-col gap-2">
                       {links.map((item) => (
-                        <Link 
-                          key={item.label}
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md p-4 no-underline outline-none focus:shadow-md hover:bg-muted/50 transition-colors" 
-                          to={item.href}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            {item.icon}
-                            <h3 className="text-base font-semibold mb-1">{item.label}</h3>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
-                        </Link>
+                        <NavigationMenuLink asChild key={item.label}>
+                          <Link 
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md p-4 no-underline outline-none focus:shadow-md hover:bg-muted/50 transition-colors" 
+                            to={item.href}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              {item.icon}
+                              <h3 className="text-base font-semibold mb-1">{item.label}</h3>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                          </Link>
+                        </NavigationMenuLink>
                       ))}
                     </li>
                   </ul>
@@ -109,12 +110,12 @@ const Navbar = () => {
           {isLogged ? (
             <Profile />
           ) : (
-            <Link to={`/auth/signin`} className={`font-semibold px-4 py-2 rounded-full transition-all duration-300 ${
+            <Link to={`/auth/signin`} className={`font-semibold text-sm sm:text-base px-2 sm:px-4 py-2 rounded-full transition-all duration-300 ${
               isScrolled 
                 ? 'bg-primary-green text-black hover:bg-primary-green/90' 
                 : 'bg-white/10 text-white hover:bg-white/20'
             }`}>
-              Sign in
+              {isMobile ? <LogIn size={20} /> : 'Sign in'}
             </Link>
           )}
         </div>

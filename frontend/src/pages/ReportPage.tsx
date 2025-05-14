@@ -1,61 +1,57 @@
 import { useState } from "react";
-import { MapPin, AlertTriangle, Trash2 } from "lucide-react";
+import { MapPin, AlertTriangle, Trash2, Check } from "lucide-react";
 import MapWithControls from "@/components/LocatonMap";
 import L from 'leaflet';
 
-// interface Coordinates {
-//   lat: number;
-//   lng: number;
-// }
-
-interface TrashBrand {
-  name: string;
-  count: number;
-}
+const COMMON_BRANDS = [
+  "Coca-Cola",
+  "Pepsi",
+  "Nestle",
+  "Danone",
+  "Mars",
+  "Snickers",
+  "Lays",
+  "Pringles",
+  "Heineken",
+  "Carlsberg",
+  "Other"
+];
 
 const ReportPage = () => {
-  const [selectedArea, setSelectedArea] = useState<L.LatLng[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<L.LatLng | null>(null);
   const [placeName, setPlaceName] = useState("");
   const [dirtLevel, setDirtLevel] = useState<"low" | "medium" | "high">("medium");
-  const [trashBrands, setTrashBrands] = useState<TrashBrand[]>([
-    { name: "", count: 0 }
-  ]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [description, setDescription] = useState("");
 
-  const handleAddTrashBrand = () => {
-    setTrashBrands([...trashBrands, { name: "", count: 0 }]);
-  };
-
-  const handleTrashBrandChange = (index: number, field: keyof TrashBrand, value: string | number) => {
-    const newTrashBrands = [...trashBrands];
-    newTrashBrands[index] = {
-      ...newTrashBrands[index],
-      [field]: value
-    };
-    setTrashBrands(newTrashBrands);
-  };
-
-  const handleRemoveTrashBrand = (index: number) => {
-    setTrashBrands(trashBrands.filter((_, i) => i !== index));
+  const handleBrandSelect = (brand: string) => {
+    if (selectedBrands.includes(brand)) {
+      setSelectedBrands(selectedBrands.filter(b => b !== brand));
+    } else {
+      setSelectedBrands([...selectedBrands, brand]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (selectedArea.length < 3) {
-      alert("Please select an area on the map first");
+    if (!selectedLocation) {
+      alert("Please select a location on the map first");
       return;
     }
 
-    // Convert LatLng objects to simple coordinates
-    const coordinates = selectedArea.map(point => ({
-      lat: point.lat,
-      lng: point.lng
+    // Convert selected brands to the required format
+    const trashBrands = selectedBrands.map(brand => ({
+      name: brand,
+      count: 1
     }));
 
     // Here you would typically send the data to your backend
     console.log({
-      coordinates,
+      location: {
+        lat: selectedLocation.lat,
+        lng: selectedLocation.lng
+      },
       placeName,
       dirtLevel,
       trashBrands,
@@ -76,11 +72,15 @@ const ReportPage = () => {
               Select Location
             </h2>
             <div className="h-[300px] rounded-lg overflow-hidden">
-              <MapWithControls onAreaSelect={setSelectedArea} mode="report" />
+              <MapWithControls 
+                onLocationSelect={setSelectedLocation} 
+                mode="report"
+                selectedLocation={selectedLocation}
+              />
             </div>
-            {selectedArea.length > 0 && (
+            {selectedLocation && (
               <p className="text-sm text-gray-400 mt-2">
-                Selected area with {selectedArea.length} points
+                Selected location: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
               </p>
             )}
           </div>
@@ -153,47 +153,24 @@ const ReportPage = () => {
               Common Trash Brands
             </h2>
             
-            <div className="space-y-4">
-              {trashBrands.map((brand, index) => (
-                <div key={index} className="flex gap-4 items-start">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={brand.name}
-                      onChange={(e) => handleTrashBrandChange(index, "name", e.target.value)}
-                      className="w-full bg-dark-color text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-green focus:border-transparent"
-                      placeholder="Brand name (e.g., Coca-Cola, Pepsi)"
-                    />
-                  </div>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      value={brand.count}
-                      onChange={(e) => handleTrashBrandChange(index, "count", parseInt(e.target.value) || 0)}
-                      className="w-full bg-dark-color text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-green focus:border-transparent"
-                      placeholder="Count"
-                      min="0"
-                    />
-                  </div>
-                  {trashBrands.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTrashBrand(index)}
-                      className="p-2 text-red-500 hover:text-red-400"
-                    >
-                      Remove
-                    </button>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {COMMON_BRANDS.map((brand) => (
+                <button
+                  key={brand}
+                  type="button"
+                  onClick={() => handleBrandSelect(brand)}
+                  className={`relative p-3 rounded-lg text-center transition-all ${
+                    selectedBrands.includes(brand)
+                      ? "bg-primary-green text-black font-medium"
+                      : "bg-dark-color text-gray-300 hover:bg-dark-color/80"
+                  }`}
+                >
+                  {brand}
+                  {selectedBrands.includes(brand) && (
+                    <Check className="absolute top-1 right-1 w-4 h-4" />
                   )}
-                </div>
+                </button>
               ))}
-              
-              <button
-                type="button"
-                onClick={handleAddTrashBrand}
-                className="text-primary-green hover:text-primary-green/80 text-sm font-medium"
-              >
-                + Add another brand
-              </button>
             </div>
           </div>
 

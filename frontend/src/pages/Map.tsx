@@ -3,19 +3,15 @@ import { Leaf, Info } from "lucide-react"
 
 const Map = () => {
   // Example coordinates, we will get this from the backend)
-  const predefinedAreas = [
-    [
-      { lat: 47.1262300592947, lng: 51.90915336778938 },
-      { lat: 47.113723007342514, lng: 51.90486081731527 },
-      { lat: 47.12026912086247, lng: 51.91979889296519 },
-      { lat: 47.12646380797616, lng: 51.91756676671864 }
-    ],
-    [
-      { lat: 47.11423737505534, lng: 51.87725113083174 },
-      { lat: 47.11189930480108, lng: 51.89648175695578 },
-      { lat: 47.106521353391614, lng: 51.890300484273084 },
-      { lat: 47.10710593964976, lng: 51.87553411064212 }
-    ]
+  const predefinedLocations = [
+    { lat: 47.1262300592947, lng: 51.90915336778938 },
+    { lat: 47.113723007342514, lng: 51.90486081731527 },
+    { lat: 47.12026912086247, lng: 51.91979889296519 },
+    { lat: 47.12646380797616, lng: 51.91756676671864 },
+    { lat: 47.11423737505534, lng: 51.87725113083174 },
+    { lat: 47.11189930480108, lng: 51.89648175695578 },
+    { lat: 47.106521353391614, lng: 51.890300484273084 },
+    { lat: 47.10710593964976, lng: 51.87553411064212 }
   ];
 
   return (
@@ -30,13 +26,12 @@ const Map = () => {
           <div className="lg:col-span-2">
             <div className="bg-dark-secondary rounded-xl p-4 shadow-lg">
               <div className="h-[600px] rounded-lg overflow-hidden">
-                <MapWithControls predefinedAreas={predefinedAreas} />
+                <MapWithControls predefinedLocations={predefinedLocations} />
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
-
             {/* Stats */}
             <div className="bg-dark-secondary rounded-xl p-6 shadow-lg">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
