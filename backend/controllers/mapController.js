@@ -6,7 +6,7 @@ export const getNearestCityData = async (req, res) => {
   try {
     const key = process.env.AIRVISUAL_API_KEY;
     const result = await axios.get(
-      "http://api.airvisual.com/v2/nearest_city?lat=47.1167&lon=51.8833&key=" + key
+      "https://api.airvisual.com/v2/nearest_city?lat=47.1167&lon=51.8833&key=" + key
     );
 
     res.status(200).json(result.data);
