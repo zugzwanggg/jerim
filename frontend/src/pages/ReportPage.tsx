@@ -21,7 +21,8 @@ const ReportPage = () => {
     { name: "", count: 0 }
   ]);
   const [description, setDescription] = useState("");
-
+  console.log(selectedArea);
+  
   const handleAddTrashBrand = () => {
     setTrashBrands([...trashBrands, { name: "", count: 0 }]);
   };
