@@ -1,5 +1,4 @@
 import { HomeIcon, Trees, Cloud, Wind, Thermometer, Droplets } from "lucide-react"
-import { atyrauLocationData } from "@/constants/mockData";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { IPollutionData, IWeatherData } from "@/types";
