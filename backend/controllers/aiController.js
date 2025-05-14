@@ -3,9 +3,6 @@ import { detectLitter } from "../services/googlegenai.js";
 
 export const objectRecognition = async (req, res) => {
   try {
-<<<<<<< HEAD
-    res.status(200).send();
-=======
     const { report_id } = req.params;
 
     if (!report_id) {
@@ -30,7 +27,6 @@ export const objectRecognition = async (req, res) => {
     return res.status(200).send({
       response,
     });
->>>>>>> yermekov
   } catch (error) {
     console.log(`Error at objectRecognition(): ${error}`);
     res.status(500).send({
