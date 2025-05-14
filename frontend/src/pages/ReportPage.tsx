@@ -1,67 +1,69 @@
 import { useState } from "react";
-import { MapPin, AlertTriangle, Trash2 } from "lucide-react";
+import { MapPin, AlertTriangle, Loader2 } from "lucide-react";
 import MapWithControls from "@/components/LocatonMap";
 import L from 'leaflet';
+import axios from "axios";
 
-// interface Coordinates {
-//   lat: number;
-//   lng: number;
-// }
-
-interface TrashBrand {
-  name: string;
-  count: number;
-}
+// const COMMON_BRANDS = [
+//   "Coca-Cola",
+//   "Pepsi",
+//   "Nestle",
+//   "Danone",
+//   "Mars",
+//   "Snickers",
+//   "Lays",
+//   "Pringles",
+//   "Heineken",
+//   "Carlsberg",
+//   "Other"
+// ];
 
 const ReportPage = () => {
-  const [selectedArea, setSelectedArea] = useState<L.LatLng[]>([]);
-  const [placeName, setPlaceName] = useState("");
-  const [dirtLevel, setDirtLevel] = useState<"low" | "medium" | "high">("medium");
-  const [trashBrands, setTrashBrands] = useState<TrashBrand[]>([
-    { name: "", count: 0 }
-  ]);
+  const [selectedLocation, setSelectedLocation] = useState<L.LatLng | null>(null);
+  // const [placeName, setPlaceName] = useState("");
+  // const [dirtLevel, setDirtLevel] = useState<"low" | "medium" | "high">("medium");
+  // const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [description, setDescription] = useState("");
-  console.log(selectedArea);
-  
-  const handleAddTrashBrand = () => {
-    setTrashBrands([...trashBrands, { name: "", count: 0 }]);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleTrashBrandChange = (index: number, field: keyof TrashBrand, value: string | number) => {
-    const newTrashBrands = [...trashBrands];
-    newTrashBrands[index] = {
-      ...newTrashBrands[index],
-      [field]: value
-    };
-    setTrashBrands(newTrashBrands);
-  };
+  // const handleBrandSelect = (brand: string) => {
+  //   if (selectedBrands.includes(brand)) {
+  //     setSelectedBrands(selectedBrands.filter(b => b !== brand));
+  //   } else {
+  //     setSelectedBrands([...selectedBrands, brand]);
+  //   }
+  // };
 
-  const handleRemoveTrashBrand = (index: number) => {
-    setTrashBrands(trashBrands.filter((_, i) => i !== index));
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (selectedArea.length < 3) {
-      alert("Please select an area on the map first");
+    if (!selectedLocation) {
+      alert("Please select a location on the map first");
       return;
     }
 
-    // Convert LatLng objects to simple coordinates
-    const coordinates = selectedArea.map(point => ({
-      lat: point.lat,
-      lng: point.lng
-    }));
+    // const trashBrands = selectedBrands.map(brand => ({
+    //   name: brand,
+    //   count: 1
+    // }));
+    setIsLoading(true)
+    try {
+      
+      await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/reports`, {
+        lat: selectedLocation.lat,
+        lng: selectedLocation.lng,
+        comment: description
+      })
 
-    // Here you would typically send the data to your backend
-    console.log({
-      coordinates,
-      placeName,
-      dirtLevel,
-      trashBrands,
-      description
-    });
+      setDescription('')
+      setSelectedLocation(null)
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false)
+    }
   };
 
   return (
@@ -77,11 +79,15 @@ const ReportPage = () => {
               Select Location
             </h2>
             <div className="h-[300px] rounded-lg overflow-hidden">
-              <MapWithControls onAreaSelect={setSelectedArea} mode="report" />
+              <MapWithControls 
+                onLocationSelect={setSelectedLocation} 
+                mode="report"
+                selectedLocation={selectedLocation}
+              />
             </div>
-            {selectedArea.length > 0 && (
+            {selectedLocation && (
               <p className="text-sm text-gray-400 mt-2">
-                Selected area with {selectedArea.length} points
+                Selected location: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
               </p>
             )}
           </div>
@@ -94,7 +100,7 @@ const ReportPage = () => {
             </h2>
             
             <div className="space-y-4">
-              <div>
+              {/* <div>
                 <label htmlFor="placeName" className="block text-sm font-medium text-gray-300 mb-1">
                   Place Name
                 </label>
@@ -107,9 +113,9 @@ const ReportPage = () => {
                   placeholder="Enter the name of the place"
                   required
                 />
-              </div>
+              </div> */}
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   Level of Pollution
                 </label>
@@ -129,11 +135,11 @@ const ReportPage = () => {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Description
+                  Comment
                 </label>
                 <textarea
                   value={description}
@@ -148,62 +154,45 @@ const ReportPage = () => {
           </div>
 
           {/* Trash Brands */}
-          <div className="bg-dark-secondary rounded-xl p-6 shadow-lg">
+          {/* <div className="bg-dark-secondary rounded-xl p-6 shadow-lg">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <Trash2 className="w-5 h-5 text-primary-green" />
               Common Trash Brands
             </h2>
             
-            <div className="space-y-4">
-              {trashBrands.map((brand, index) => (
-                <div key={index} className="flex gap-4 items-start">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={brand.name}
-                      onChange={(e) => handleTrashBrandChange(index, "name", e.target.value)}
-                      className="w-full bg-dark-color text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-green focus:border-transparent"
-                      placeholder="Brand name (e.g., Coca-Cola, Pepsi)"
-                    />
-                  </div>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      value={brand.count}
-                      onChange={(e) => handleTrashBrandChange(index, "count", parseInt(e.target.value) || 0)}
-                      className="w-full bg-dark-color text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-green focus:border-transparent"
-                      placeholder="Count"
-                      min="0"
-                    />
-                  </div>
-                  {trashBrands.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTrashBrand(index)}
-                      className="p-2 text-red-500 hover:text-red-400"
-                    >
-                      Remove
-                    </button>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {COMMON_BRANDS.map((brand) => (
+                <button
+                  key={brand}
+                  type="button"
+                  onClick={() => handleBrandSelect(brand)}
+                  className={`relative p-3 rounded-lg text-center transition-all ${
+                    selectedBrands.includes(brand)
+                      ? "bg-primary-green text-black font-medium"
+                      : "bg-dark-color text-gray-300 hover:bg-dark-color/80"
+                  }`}
+                >
+                  {brand}
+                  {selectedBrands.includes(brand) && (
+                    <Check className="absolute top-1 right-1 w-4 h-4" />
                   )}
-                </div>
+                </button>
               ))}
-              
-              <button
-                type="button"
-                onClick={handleAddTrashBrand}
-                className="text-primary-green hover:text-primary-green/80 text-sm font-medium"
-              >
-                + Add another brand
-              </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-primary-green text-black font-semibold py-3 rounded-lg hover:bg-primary-green/90 transition-all"
+            className="w-full text-white bg-primary-green text-black font-semibold py-3 rounded-lg hover:bg-primary-green/90 transition-all"
           >
-            Submit Report
+            {
+              isLoading
+              ?
+              <Loader2 className="animate-spin mx-auto"/>
+              :
+              'Submit Report'
+            }
           </button>
         </form>
       </div>

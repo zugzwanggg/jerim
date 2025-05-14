@@ -28,7 +28,7 @@ const Profile = () => {
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 bg-[#1E1E1E] text-[#FAFAFA] border-[#2A252C]">
+            <DropdownMenuContent className="w-64 bg-[#1E1E1E] text-[#FAFAFA] border-[#2A252C] z-[100]">
                 <DropdownMenuLabel><p className="p-1">{user?.username}</p></DropdownMenuLabel>
                 <DropdownMenuSeparator className=""  />
                 {/* <DropdownMenuGroup> */}

@@ -15,9 +15,7 @@ export const getUserByID = async (req, res) => {
       user_id,
     ]);
 
-    return res.status(200).send({
-      content: dbQuery.rows[0],
-    });
+    return res.status(200).send(dbQuery.rows[0]);
   } catch (error) {
     console.log(`Error at getUserByID(): ${error}`);
     return res.status(500).send({

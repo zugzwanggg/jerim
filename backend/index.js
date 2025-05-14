@@ -6,6 +6,7 @@ import cors from "cors";
 import { authRouter } from "./routes/authRoutes.js";
 import { userRouter } from "./routes/userRoutes.js";
 import { mapRoute } from "./routes/mapRoute.js";
+import { aiRouter } from "./routes/aiRoutes.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(
 app.use("/api", authRouter);
 app.use("/api", userRouter);
 app.use("/api", mapRoute);
+app.use("/api", aiRouter);
 
 const PORT = process.env.PORT || 8080;
 
