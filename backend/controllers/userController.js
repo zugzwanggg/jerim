@@ -111,3 +111,30 @@ export const editAvatar = async (req, res) => {
     });
   }
 };
+
+export const getRecentActivity = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return res.status(400).send({
+        error_message: "Must provide user_id",
+      });
+    }
+
+    const dbQuery = await db.query(
+      `
+      SELECT r.*, pl.*, p.* FROM reports r INNER JOIN picked_litters pl ON r.user_id=pl.user_id INNER JOIN plants p ON pl.user_id=p.user_id WHERE r.user_id=$1
+    `,
+      [user_id]
+    );
+
+    return res.status(200).send(dbQuery.fields);
+  } catch (error) {
+    console.log(`Error at getRecentActivity(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};

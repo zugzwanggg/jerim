@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   editAvatar,
   editUsername,
+  getRecentActivity,
   getUserByID,
 } from "../controllers/userController.js";
 import { checkAuth } from "../middleware/checkAuth.js";
@@ -17,3 +18,4 @@ userRouter.patch(
   uploadImage.single("avatar"),
   editAvatar
 );
+userRouter.get("/user/:user_id/recent_activity", getRecentActivity);
