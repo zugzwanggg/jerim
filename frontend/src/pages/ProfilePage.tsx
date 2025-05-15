@@ -10,6 +10,7 @@ interface IUser {
   email: string;
   avatar: string;
   created_at: string;
+  points: number;
 }
 
 const ProfilePage = () => {
@@ -21,6 +22,7 @@ const ProfilePage = () => {
   const [avatar, setAvatar] = useState<string>("");
   const [email, setEmail] = useState(userData?.email);
   const [createdAt, setCreatedAt] = useState<Date | undefined>(undefined);
+  const [points, setPoints] = useState<number>(0);
 
   const formatDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -42,6 +44,7 @@ const ProfilePage = () => {
       setAvatar(response.avatar);
       setEmail(response?.email);
       setCreatedAt(new Date(response.created_at));
+      setPoints(response?.points);
     } catch (error) {
       console.log(error);
     }
@@ -51,6 +54,8 @@ const ProfilePage = () => {
     const fetch = async () => {
       try {
         fetchUserData();
+        console.log(userData);
+        console.log(points);
       } catch (error) {
         console.log(error);
       }
@@ -113,7 +118,7 @@ const ProfilePage = () => {
               <h3 className="text-xl font-semibold text-white">Points</h3>
             </div>
             <p className="text-3xl font-bold text-white">
-              {user.points.toLocaleString()}
+              {points !== null ? points : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
               Total contribution points
@@ -128,7 +133,7 @@ const ProfilePage = () => {
               </h3>
             </div>
             <p className="text-3xl font-bold text-white">
-              {(user.points / 10).toLocaleString()}
+              {points !== null ? points : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
               Trees planted through contributions
