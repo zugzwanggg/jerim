@@ -23,6 +23,7 @@ const ProfilePage = () => {
   const [email, setEmail] = useState(userData?.email);
   const [createdAt, setCreatedAt] = useState<Date | undefined>(undefined);
   const [points, setPoints] = useState<number>(0);
+  const [plants, setPlants] = useState<number>(0);
 
   const formatDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -39,12 +40,19 @@ const ProfilePage = () => {
         )
       ).data;
 
+      const getPlants = (
+        await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}/get_plants`
+        )
+      ).data;
+
       setUserData(response);
       setUsername(response?.username);
       setAvatar(response.avatar);
       setEmail(response?.email);
       setCreatedAt(new Date(response.created_at));
       setPoints(response?.points);
+      setPlants(getPlants?.count);
     } catch (error) {
       console.log(error);
     }
@@ -54,8 +62,6 @@ const ProfilePage = () => {
     const fetch = async () => {
       try {
         fetchUserData();
-        console.log(userData);
-        console.log(points);
       } catch (error) {
         console.log(error);
       }
@@ -133,7 +139,7 @@ const ProfilePage = () => {
               </h3>
             </div>
             <p className="text-3xl font-bold text-white">
-              {points !== null ? points : "N/A"}
+              {plants !== null ? plants : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
               Trees planted through contributions

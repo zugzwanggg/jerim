@@ -112,6 +112,31 @@ export const editAvatar = async (req, res) => {
   }
 };
 
+export const getUserPlants = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return res.status(400).send({
+        error_message: "Must provide user_id",
+      });
+    }
+
+    const dbQuery = await db.query(
+      "SELECT COUNT(*) FROM plants WHERE user_id=$1",
+      [user_id]
+    );
+
+    return res.status(200).send(dbQuery.rows[0]);
+  } catch (error) {
+    console.log(`Error at getUserPlants(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};
+
 export const getRecentActivity = async (req, res) => {
   try {
     const { user_id } = req.params;
