@@ -1,7 +1,7 @@
 import { fakeUsers } from "@/constants/mockData";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Award, MapPin, Mail, Leaf, TreePine } from "lucide-react";
+import { Award, Mail, Leaf, TreePine, CalendarDays } from "lucide-react";
 import axios from "axios";
 
 interface IUser {
@@ -9,7 +9,7 @@ interface IUser {
   username: string;
   email: string;
   avatar: string;
-  created_at: Date;
+  created_at: string;
 }
 
 const ProfilePage = () => {
@@ -20,6 +20,14 @@ const ProfilePage = () => {
   const [username, setUsername] = useState(userData?.username);
   const [avatar, setAvatar] = useState<string>("");
   const [email, setEmail] = useState(userData?.email);
+  const [createdAt, setCreatedAt] = useState<Date | undefined>(undefined);
+
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
 
   const fetchUserData = async () => {
     try {
@@ -33,6 +41,7 @@ const ProfilePage = () => {
       setUsername(response?.username);
       setAvatar(response.avatar);
       setEmail(response?.email);
+      setCreatedAt(new Date(response.created_at));
     } catch (error) {
       console.log(error);
     }
@@ -78,16 +87,18 @@ const ProfilePage = () => {
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-bold text-white mb-2">{username}</h1>
-              <p className="text-gray-300 mb-4">{user.bio}</p>
 
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-400">
+              <div className="flex flex-wrap flex-col md:justify-start gap-4 text-sm text-gray-400">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   <span>{email}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>Atyrau, Kazakhstan</span>
+                  <CalendarDays className="w-4 h-4" />
+                  <span>
+                    Member since:{" "}
+                    {createdAt ? formatDate(createdAt) : "Unknown"}
+                  </span>
                 </div>
               </div>
             </div>
