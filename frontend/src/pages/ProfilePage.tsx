@@ -30,6 +30,7 @@ interface IActivity {
   description: string;
   created_at: string;
   activity_type: string;
+  reward: number;
 }
 
 const ProfilePage = () => {
@@ -219,7 +220,11 @@ const ProfilePage = () => {
                     <p className="text-white font-medium">
                       {item.comment || item.description}
                     </p>
-                    <p className="text-sm text-gray-400">Earned 10 points</p>
+                    <p className="text-sm text-gray-400">
+                      {item.reward !== 0
+                        ? `Earned ${item.reward} points`
+                        : "No points Earned"}
+                    </p>
                   </div>
                   <div className="ml-auto text-sm text-gray-400">
                     {formatDistanceToNowStrict(new Date(item.created_at), {

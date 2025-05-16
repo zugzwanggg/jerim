@@ -154,11 +154,11 @@ export const getRecentActivity = async (req, res) => {
 
     const dbQuery = await db.query(
       `WITH combined_activities AS (
-        SELECT id, user_id, comment, created_at, 'report' AS activity_type FROM reports WHERE user_id = $1
+        SELECT id, user_id, comment, created_at, reward, 'report' AS activity_type FROM reports WHERE user_id = $1
         UNION ALL
-        SELECT id, user_id, description, created_at, 'picked_litter' AS activity_type FROM picked_litters WHERE user_id = $1
+        SELECT id, user_id, description, created_at, reward, 'picked_litter' AS activity_type FROM picked_litters WHERE user_id = $1
         UNION ALL
-        SELECT id, user_id, comment, created_at, 'tree_plant' AS activity_type FROM plants WHERE user_id = $1
+        SELECT id, user_id, comment, created_at, reward, 'tree_plant' AS activity_type FROM plants WHERE user_id = $1
       )
       SELECT id, user_id, comment, created_at, activity_type
       FROM combined_activities
