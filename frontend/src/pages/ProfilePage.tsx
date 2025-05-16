@@ -24,6 +24,7 @@ const ProfilePage = () => {
   const [createdAt, setCreatedAt] = useState<Date | undefined>(undefined);
   const [points, setPoints] = useState<number>(0);
   const [plants, setPlants] = useState<number>(0);
+  const [position, setPosition] = useState<number>(0);
 
   const formatDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -46,6 +47,12 @@ const ProfilePage = () => {
         )
       ).data;
 
+      const getPosition = (
+        await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}/leaderboard`
+        )
+      ).data;
+
       setUserData(response);
       setUsername(response?.username);
       setAvatar(response.avatar);
@@ -53,6 +60,7 @@ const ProfilePage = () => {
       setCreatedAt(new Date(response.created_at));
       setPoints(response?.points);
       setPlants(getPlants?.count);
+      setPosition(getPosition?.rank_num);
     } catch (error) {
       console.log(error);
     }
@@ -127,7 +135,7 @@ const ProfilePage = () => {
               {points !== null ? points : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              Total contribution points
+              Total Contribution Points
             </p>
           </div>
 
@@ -142,7 +150,7 @@ const ProfilePage = () => {
               {plants !== null ? plants : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              Trees planted through contributions
+              Trees Planted Through Contributions
             </p>
           </div>
 
@@ -151,9 +159,9 @@ const ProfilePage = () => {
               <Award className="w-6 h-6 text-primary-green" />
               <h3 className="text-xl font-semibold text-white">Rank</h3>
             </div>
-            <p className="text-3xl font-bold text-white">#{user.id}</p>
+            <p className="text-3xl font-bold text-white">#{position}</p>
             <p className="text-sm text-gray-400 mt-1">
-              Current leaderboard position
+              Current Global Leaderboard Position
             </p>
           </div>
         </div>

@@ -146,7 +146,7 @@ export const getLeaderboardPosition = async (req, res) => {
       [user_id]
     );
 
-    return res.status(200).send(dbQuery.rows);
+    return res.status(200).send(dbQuery.rows[0]);
   } catch (error) {
     console.log(`Error at getLeaderboardPosition(): ${error}`);
     console.log(error);
