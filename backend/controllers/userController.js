@@ -137,6 +137,25 @@ export const getUserPlants = async (req, res) => {
   }
 };
 
+export const getLeaderboardPosition = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const dbQuery = await db.query(
+      "SELECT rank_num FROM (SELECT id, RANK() OVER (ORDER BY points DESC) AS rank_num FROM users) AS ranked_users WHERE id=$1",
+      [user_id]
+    );
+
+    return res.status(200).send(dbQuery.rows);
+  } catch (error) {
+    console.log(`Error at getLeaderboardPosition(): ${error}`);
+    console.log(error);
+    return res.status(200).send({
+      error,
+    });
+  }
+};
+
 export const getRecentActivity = async (req, res) => {
   try {
     const { user_id } = req.params;

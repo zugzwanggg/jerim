@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   editAvatar,
   editUsername,
+  getLeaderboardPosition,
   getRecentActivity,
   getUserByID,
   getUserPlants,
@@ -21,3 +22,4 @@ userRouter.patch(
 );
 userRouter.get("/user/:user_id/recent_activity", getRecentActivity);
 userRouter.get("/user/:user_id/get_plants", getUserPlants);
+userRouter.get("/user/:user_id/leaderboard", getLeaderboardPosition);
