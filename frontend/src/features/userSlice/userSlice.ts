@@ -1,43 +1,45 @@
 import type { IUser } from "@/types";
-import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-
 type isLoggedResponse = {
-  isLogged: boolean,
-  user?: IUser
-}
+  isLogged: boolean;
+  user?: IUser;
+};
 
 export const fetchUserIsLogged = createAsyncThunk<isLoggedResponse>(
-  'user/isLogged',
+  "api/isLogged",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get<isLoggedResponse>(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/isLogged`);
-      
+      const res = await axios.get<isLoggedResponse>(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/api/isLogged`
+      );
+
       return res.data;
     } catch (error: any) {
-      return rejectWithValue(error.res?.data || "Error while checking is user auth")
+      return rejectWithValue(
+        error.res?.data || "Error while checking is user auth"
+      );
     }
   }
-)
+);
 
 interface IUserState {
-  isLogged: boolean,
-  user?: IUser | null,
-  isLoading: boolean
+  isLogged: boolean;
+  user?: IUser | null;
+  isLoading: boolean;
 }
 
-const initialState:IUserState = {
+const initialState: IUserState = {
   isLogged: false,
   user: null,
-  isLoading: false
-}
+  isLoading: false,
+};
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
-  reducers: {
-  },
+  reducers: {},
   extraReducers(builder) {
     builder
       .addCase(fetchUserIsLogged.pending, (state) => {
@@ -50,9 +52,9 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserIsLogged.rejected, (state) => {
         state.isLoading = false;
-      })
+      });
   },
-})
+});
 
 export const {} = userSlice.actions;
-export default userSlice.reducer
+export default userSlice.reducer;
