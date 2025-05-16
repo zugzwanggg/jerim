@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Award, Mail, Leaf, TreePine, CalendarDays } from "lucide-react";
 import axios from "axios";
+import { formatDistanceToNowStrict } from "date-fns";
 
 interface IUser {
   id: number | string;
@@ -14,9 +15,19 @@ interface IUser {
   ranking: number;
 }
 
+interface IActivity {
+  id: number;
+  user_id: number;
+  comment: string;
+  description: string;
+  created_at: string;
+  activity_type: string;
+}
+
 const ProfilePage = () => {
   const { id } = useParams();
   const userId = id ? parseInt(id) : null;
+
   const [userData, setUserData] = useState<null | IUser>(null);
   const [username, setUsername] = useState(userData?.username);
   const [avatar, setAvatar] = useState<string>("");
@@ -25,6 +36,8 @@ const ProfilePage = () => {
   const [points, setPoints] = useState<number>(0);
   const [plants, setPlants] = useState<number>(0);
   const [position, setPosition] = useState<number>(0);
+
+  const [activities, setActivities] = useState([]);
 
   const formatDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -54,10 +67,27 @@ const ProfilePage = () => {
     }
   };
 
+  const fetchUserActivities = async () => {
+    try {
+      const recentActivity = (
+        await axios.get(
+          `${
+            import.meta.env.VITE_BACKEND_BASE_URL
+          }/api/user/${userId}/recent_activity`
+        )
+      ).data;
+
+      setActivities(recentActivity);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const fetch = async () => {
       try {
         fetchUserData();
+        fetchUserActivities();
       } catch (error) {
         console.log(error);
       }
@@ -65,6 +95,8 @@ const ProfilePage = () => {
 
     fetch();
   }, []);
+
+  console.log(activities);
 
   if (!userId) {
     return (
@@ -160,21 +192,31 @@ const ProfilePage = () => {
             Recent Activity
           </h2>
           <div className="space-y-4">
-            {[1, 2, 3].map((_, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-3 rounded-lg bg-dark-color/50"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary-green/20 flex items-center justify-center">
-                  <Leaf className="w-5 h-5 text-primary-green" />
+            {activities.length > 0 ? (
+              activities.map((item: IActivity) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-4 p-3 rounded-lg bg-dark-color/50"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary-green/20 flex items-center justify-center">
+                    <Leaf className="w-5 h-5 text-primary-green" />
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">
+                      {item.activity_type}: {item.comment || item.description}
+                    </p>
+                    <p className="text-sm text-gray-400">Earned 10 points</p>
+                  </div>
+                  <div className="ml-auto text-sm text-gray-400">
+                    {formatDistanceToNowStrict(new Date(item.created_at), {
+                      addSuffix: true,
+                    })}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white font-medium">Completed a route</p>
-                  <p className="text-sm text-gray-400">Earned 10 points</p>
-                </div>
-                <div className="ml-auto text-sm text-gray-400">2h ago</div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>{username} has not made any contributions yet :(</p>
+            )}
           </div>
         </div>
       </div>
