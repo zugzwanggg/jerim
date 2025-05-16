@@ -194,7 +194,7 @@ export const authTgMiniApp = async (req,res) => {
       return res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: new Date(0),
+        maxAge: 30 * 24 * 60 * 60 * 1000,
         sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
       })
     }
@@ -209,7 +209,7 @@ export const authTgMiniApp = async (req,res) => {
     res.status(200).cookie("token", payload, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: sevenDays,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
     })
     
