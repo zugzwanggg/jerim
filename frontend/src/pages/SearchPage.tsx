@@ -3,12 +3,20 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 
+interface IUser {
+  id: number;
+  username: string;
+  avatar: string;
+  points: number;
+  rank_num: number;
+}
+
 const SearchPage = () => {
   const location = useLocation();
   const removeSpace = location?.search?.slice(3)?.split("%20")?.join(" ");
   const [query] = useState(removeSpace);
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<IUser[]>([]);
 
   const fetchUsers = async () => {
     try {

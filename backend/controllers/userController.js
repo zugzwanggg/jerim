@@ -175,13 +175,13 @@ export const searchUsers = async (req, res) => {
 
     if (!q) {
       const response = await db.query(
-        "SELECT id, username, avatar, points FROM users"
+        "SELECT id, username, avatar, points, rank_num FROM users"
       );
       return res.status(200).send(response.rows);
     }
 
     const response = await db.query(
-      "SELECT id, username, avatar, points FROM users WHERE LOWER(username) LIKE LOWER($1)",
+      "SELECT id, username, avatar, points, rank_num FROM users WHERE LOWER(username) LIKE LOWER($1)",
       [`%${q.toLowerCase()}%`]
     );
 
