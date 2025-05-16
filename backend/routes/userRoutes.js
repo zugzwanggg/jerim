@@ -2,10 +2,10 @@ import { Router } from "express";
 import {
   editAvatar,
   editUsername,
-  getLeaderboardPosition,
+  getGlobalLeaderboard,
   getRecentActivity,
   getUserByID,
-  getUserPlants,
+  searchUsers,
 } from "../controllers/userController.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 import { uploadImage } from "../middleware/uploadImage.js";
@@ -21,5 +21,5 @@ userRouter.patch(
   editAvatar
 );
 userRouter.get("/user/:user_id/recent_activity", getRecentActivity);
-userRouter.get("/user/:user_id/get_plants", getUserPlants);
-userRouter.get("/user/:user_id/leaderboard", getLeaderboardPosition);
+userRouter.get("/leaderboard", getGlobalLeaderboard);
+userRouter.get("/search", searchUsers);

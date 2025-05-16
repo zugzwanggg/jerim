@@ -11,11 +11,25 @@ export const getUserByID = async (req, res) => {
       });
     }
 
-    const dbQuery = await db.query("SELECT * FROM users WHERE id=$1", [
-      user_id,
-    ]);
+    const userData = await db.query(
+      "SELECT id, username, email, avatar, created_at, points FROM users WHERE id=$1",
+      [user_id]
+    );
 
-    return res.status(200).send(dbQuery.rows[0]);
+    const userPlants = await db.query(
+      "SELECT COUNT(*) FROM plants WHERE user_id=$1",
+      [user_id]
+    );
+
+    const userRank = await db.query(
+      "SELECT rank_num FROM (SELECT id, RANK() OVER (ORDER BY points DESC) AS rank_num FROM users) AS ranked_users WHERE id=$1",
+      [user_id]
+    );
+
+    userData.rows[0].plants = parseInt(userPlants.rows[0]?.count);
+    userData.rows[0].ranking = parseInt(userRank.rows[0]?.rank_num);
+
+    return res.status(200).send(userData.rows[0]);
   } catch (error) {
     console.log(`Error at getUserByID(): ${error}`);
     return res.status(500).send({
@@ -112,45 +126,17 @@ export const editAvatar = async (req, res) => {
   }
 };
 
-export const getUserPlants = async (req, res) => {
+export const getGlobalLeaderboard = async (req, res) => {
   try {
-    const { user_id } = req.params;
-
-    if (!user_id) {
-      return res.status(400).send({
-        error_message: "Must provide user_id",
-      });
-    }
-
     const dbQuery = await db.query(
-      "SELECT COUNT(*) FROM plants WHERE user_id=$1",
-      [user_id]
+      "SELECT id, username, avatar, points, RANK() OVER (ORDER BY points DESC) as rank_num FROM users ORDER BY points DESC LIMIT 100;"
     );
 
-    return res.status(200).send(dbQuery.rows[0]);
+    return res.status(200).send(dbQuery.rows);
   } catch (error) {
-    console.log(`Error at getUserPlants(): ${error}`);
+    console.log(`Error at getGlobalLeaderboard(): ${error}`);
     console.log(error);
     return res.status(500).send({
-      error,
-    });
-  }
-};
-
-export const getLeaderboardPosition = async (req, res) => {
-  try {
-    const { user_id } = req.params;
-
-    const dbQuery = await db.query(
-      "SELECT rank_num FROM (SELECT id, RANK() OVER (ORDER BY points DESC) AS rank_num FROM users) AS ranked_users WHERE id=$1",
-      [user_id]
-    );
-
-    return res.status(200).send(dbQuery.rows[0]);
-  } catch (error) {
-    console.log(`Error at getLeaderboardPosition(): ${error}`);
-    console.log(error);
-    return res.status(200).send({
       error,
     });
   }
@@ -167,15 +153,49 @@ export const getRecentActivity = async (req, res) => {
     }
 
     const dbQuery = await db.query(
-      `
-      SELECT r.*, pl.*, p.* FROM reports r INNER JOIN picked_litters pl ON r.user_id=pl.user_id INNER JOIN plants p ON pl.user_id=p.user_id WHERE r.user_id=$1
-    `,
+      `WITH combined_activities AS (
+        SELECT id, user_id, comment, created_at, reward, 'report' AS activity_type FROM reports WHERE user_id = $1
+        UNION ALL
+        SELECT id, user_id, description, created_at, reward, 'picked_litter' AS activity_type FROM picked_litters WHERE user_id = $1
+        UNION ALL
+        SELECT id, user_id, comment, created_at, reward, 'tree_plant' AS activity_type FROM plants WHERE user_id = $1
+      )
+      SELECT id, user_id, comment, created_at, reward, activity_type
+      FROM combined_activities
+      ORDER BY created_at DESC
+      LIMIT 3;`,
       [user_id]
     );
 
-    return res.status(200).send(dbQuery.fields);
+    return res.status(200).send(dbQuery.rows);
   } catch (error) {
     console.log(`Error at getRecentActivity(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      const response = await db.query(
+        "SELECT id, username, avatar, points FROM users"
+      );
+      return res.status(200).send(response.rows);
+    }
+
+    const response = await db.query(
+      "SELECT id, username, avatar, points FROM users WHERE LOWER(username) LIKE LOWER($1)",
+      [`%${q.toLowerCase()}%`]
+    );
+
+    return res.status(200).send(response.rows);
+  } catch (error) {
+    console.log(`Error at searchUsers(): ${error}`);
     console.log(error);
     return res.status(500).send({
       error,

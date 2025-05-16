@@ -1,12 +1,13 @@
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    avatar TEXT NOT NULL,
-    password TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    google_id TEXT UNIQUE,
-    telegram_id TEXT UNIQUE
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  avatar TEXT NOT NULL,
+  password TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  google_id TEXT UNIQUE,
+  points INT NOT NULL DEFAULT 0,
+  telegram_id TEXT UNIQUE
 );
 
 CREATE TABLE reports (
@@ -15,6 +16,7 @@ CREATE TABLE reports (
   lat NUMERIC(9, 6),
   lng NUMERIC(9, 6),
   comment VARCHAR(300),
+  reward INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   FOREIGN KEY (user_id) REFERENCES users(id),
 );
@@ -27,6 +29,7 @@ CREATE TABLE picked_litters (
   image TEXT,
   brand VARCHAR(200),
   description TEXT,
+  reward INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -38,6 +41,7 @@ CREATE TABLE plants (
   lng NUMERIC(9, 6),
   image TEXT,
   comment VARCHAR(300),
+  reward INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
 )

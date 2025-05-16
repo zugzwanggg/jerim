@@ -109,11 +109,13 @@ export const pickLitter = async (req, res) => {
     );
 
     await db.query(
-      `INSERT INTO picked_litters (user_id, lat, lng, image, brand, description)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO picked_litters (user_id, lat, lng, image, brand, description, reward)
+       VALUES ($1, $2, $3, $4, $5, $6, 35)
       `,
       [id, lat, lng, imageUrl, brand, description]
     );
+
+    await db.query("UPDATE users SET points=points+35 WHERE id=$1", [id]);
 
     res.status(200).json({
       message: "Succesfully submited",
@@ -169,9 +171,11 @@ export const plantATree = async (req, res) => {
     );
 
     await db.query(
-      `INSERT INTO plants (user_id, lat, lng, image, comment) VALUES ($1, $2, $3, $4, $5)`,
+      `INSERT INTO plants (user_id, lat, lng, image, comment, reward) VALUES ($1, $2, $3, $4, $5, 60)`,
       [id, lat, lng, imageUrl, comment]
     );
+
+    await db.query("UPDATE users SET points=points+60 WHERE id=$1", [id]);
 
     res.status(200).json({
       message: "Succesfully planted",
