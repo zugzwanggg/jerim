@@ -18,9 +18,27 @@ axios.defaults.withCredentials = true;
 
 function App() {
   const dispatch = useAppDispatch();
-  const {isLogged} = useAppSelector((state)=>state.user);
+  const {isLogged, user} = useAppSelector((state)=>state.user);
+
+
+  const handleTelegramMiniApp = async () => {
+    try {
+      
+      await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/telegram`, {
+        tgId: window.Telegram?.WebApp.initDataUnsafe.user?.id,
+        username: window.Telegram?.WebApp.initDataUnsafe.user?.username,
+        avatar: window.Telegram?.WebApp.initDataUnsafe.user?.photo_url
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
+    if (!user && window.Telegram?.WebApp.initDataUnsafe.user) {
+      handleTelegramMiniApp();
+    }
     dispatch(fetchUserIsLogged());
     document.body.classList.add('dark');
   }, [])

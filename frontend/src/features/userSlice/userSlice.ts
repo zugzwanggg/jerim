@@ -13,8 +13,7 @@ export const fetchUserIsLogged = createAsyncThunk<isLoggedResponse>(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get<isLoggedResponse>(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/isLogged`);
-      console.log(res.data);
-
+      
       return res.data;
     } catch (error: any) {
       return rejectWithValue(error.res?.data || "Error while checking is user auth")

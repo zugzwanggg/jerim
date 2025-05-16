@@ -172,3 +172,49 @@ export const isLogged = async (req, res) => {
     });
   }
 };
+
+export const authTgMiniApp = async (req,res) => {
+  try {
+    const { tgId, username, avatar } = req.body;
+
+    if (!tgId || !username || !avatar) {
+      return res.status(400).json({
+        message: "Provide all the required values"
+      })
+    }
+
+    const checkUser = await db.query(`
+      SELECT * FROM users WHERE telegram_id = $1
+    `, [tgId]);
+
+    if (checkUser.rows.length > 0) {
+      const payload = checkUser.rows[0];
+      const token = jwt.sign(payload, JWT_SECRET);
+
+      return res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: new Date(0),
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+      })
+    }
+
+    const user = await db.query(`
+      INSERT INTO users (username, avatar, email, telegram_id)
+      VALUES ($1, $2, $3)
+    `, [username, avatar, `Telegram: @${username}`, tgId])
+    
+    const payload = user.rows[0];
+
+    res.status(200).cookie("token", payload, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: new Date(0),
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    })
+    
+  } catch (error) {
+    console.log('Error at auth authTgMiniApp:', error);
+    res.status(500).send(error)
+  }
+}

@@ -6,6 +6,7 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     google_id TEXT UNIQUE,
+    telegram_id TEXT UNIQUE
 );
 
 CREATE TABLE reports (

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  authTgMiniApp,
   isLogged,
   login,
   logout,
@@ -12,3 +13,5 @@ authRouter.post("/register", register);
 authRouter.post("/login", login);
 authRouter.get("/logout", logout);
 authRouter.get("/islogged", isLogged);
+
+authRouter.post('/telegram', authTgMiniApp);
