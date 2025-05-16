@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || origin?.includes("web.telegram.org")) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
