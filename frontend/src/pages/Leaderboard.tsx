@@ -1,21 +1,18 @@
 import UserCard from "@/components/UserCard";
-import { fakeUsers } from "@/constants/mockData";
 import { Trophy, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router";
 
-// interface ILeaderboardUser {
-//   id: number | string;
-//   username: string;
-//   avatar: string;
-//   points: number | string;
-//   rank_num: number;
-// }
+interface IUser {
+  id: number;
+  username: string;
+  avatar: string;
+  points: number;
+  rank_num: number;
+}
 
 const Leaderboard = () => {
-  // const sortedUsers = [...fakeUsers].sort((a, b) => b.points - a.points);
-  const [sortedUsers, setSortedUsers] = useState([]);
+  const [sortedUsers, setSortedUsers] = useState<IUser[]>([]);
   const fetchLeaderboard = async () => {
     try {
       const response = (
@@ -24,7 +21,6 @@ const Leaderboard = () => {
         )
       ).data;
 
-      console.log(response);
       setSortedUsers(response);
     } catch (error) {
       console.log(error);

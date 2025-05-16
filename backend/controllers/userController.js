@@ -11,11 +11,25 @@ export const getUserByID = async (req, res) => {
       });
     }
 
-    const dbQuery = await db.query("SELECT * FROM users WHERE id=$1", [
-      user_id,
-    ]);
+    const userData = await db.query(
+      "SELECT id, username, email, avatar, created_at, points FROM users WHERE id=$1",
+      [user_id]
+    );
 
-    return res.status(200).send(dbQuery.rows[0]);
+    const userPlants = await db.query(
+      "SELECT COUNT(*) FROM plants WHERE user_id=$1",
+      [user_id]
+    );
+
+    const userRank = await db.query(
+      "SELECT rank_num FROM (SELECT id, RANK() OVER (ORDER BY points DESC) AS rank_num FROM users) AS ranked_users WHERE id=$1",
+      [user_id]
+    );
+
+    userData.rows[0].plants = parseInt(userPlants.rows[0]?.count);
+    userData.rows[0].ranking = parseInt(userRank.rows[0]?.rank_num);
+
+    return res.status(200).send(userData.rows[0]);
   } catch (error) {
     console.log(`Error at getUserByID(): ${error}`);
     return res.status(500).send({
@@ -107,50 +121,6 @@ export const editAvatar = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      error,
-    });
-  }
-};
-
-export const getUserPlants = async (req, res) => {
-  try {
-    const { user_id } = req.params;
-
-    if (!user_id) {
-      return res.status(400).send({
-        error_message: "Must provide user_id",
-      });
-    }
-
-    const dbQuery = await db.query(
-      "SELECT COUNT(*) FROM plants WHERE user_id=$1",
-      [user_id]
-    );
-
-    return res.status(200).send(dbQuery.rows[0]);
-  } catch (error) {
-    console.log(`Error at getUserPlants(): ${error}`);
-    console.log(error);
-    return res.status(500).send({
-      error,
-    });
-  }
-};
-
-export const getLeaderboardPosition = async (req, res) => {
-  try {
-    const { user_id } = req.params;
-
-    const dbQuery = await db.query(
-      "SELECT rank_num FROM (SELECT id, RANK() OVER (ORDER BY points DESC) AS rank_num FROM users) AS ranked_users WHERE id=$1",
-      [user_id]
-    );
-
-    return res.status(200).send(dbQuery.rows[0]);
-  } catch (error) {
-    console.log(`Error at getLeaderboardPosition(): ${error}`);
-    console.log(error);
-    return res.status(200).send({
       error,
     });
   }

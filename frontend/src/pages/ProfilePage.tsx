@@ -10,6 +10,8 @@ interface IUser {
   avatar: string;
   created_at: string;
   points: number;
+  plants: number;
+  ranking: number;
 }
 
 const ProfilePage = () => {
@@ -39,30 +41,14 @@ const ProfilePage = () => {
         )
       ).data;
 
-      const getPlants = (
-        await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_BASE_URL
-          }/api/user/${userId}/get_plants`
-        )
-      ).data;
-
-      const getPosition = (
-        await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_BASE_URL
-          }/api/user/${userId}/leaderboard`
-        )
-      ).data;
-
       setUserData(response);
       setUsername(response?.username);
       setAvatar(response.avatar);
       setEmail(response?.email);
       setCreatedAt(new Date(response.created_at));
       setPoints(response?.points);
-      setPlants(getPlants?.count);
-      setPosition(getPosition?.rank_num);
+      setPlants(response?.plants);
+      setPosition(response?.ranking);
     } catch (error) {
       console.log(error);
     }
