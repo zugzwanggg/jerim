@@ -5,6 +5,7 @@ import {
   getGlobalLeaderboard,
   getRecentActivity,
   getUserByID,
+  searchUsers,
 } from "../controllers/userController.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 import { uploadImage } from "../middleware/uploadImage.js";
@@ -21,3 +22,4 @@ userRouter.patch(
 );
 userRouter.get("/user/:user_id/recent_activity", getRecentActivity);
 userRouter.get("/leaderboard", getGlobalLeaderboard);
+userRouter.get("/search", searchUsers);

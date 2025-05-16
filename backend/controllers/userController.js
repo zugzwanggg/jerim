@@ -168,3 +168,29 @@ export const getRecentActivity = async (req, res) => {
     });
   }
 };
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      const response = await db.query(
+        "SELECT id, username, avatar, points FROM users"
+      );
+      return res.status(200).send(response.rows);
+    }
+
+    const response = await db.query(
+      "SELECT id, username, avatar, points FROM users WHERE LOWER(username) LIKE LOWER($1)",
+      [`%${q.toLowerCase()}%`]
+    );
+
+    return res.status(200).send(response.rows);
+  } catch (error) {
+    console.log(`Error at searchUsers(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};
