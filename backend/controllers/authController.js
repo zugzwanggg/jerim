@@ -61,9 +61,9 @@ export const register = async (req, res) => {
 
     const payload = newUser.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
-
+    const isMobileWebView = req.headers['user-agent']?.includes('TelegramWebApp');
     res.cookie("token", token, {
-      httpOnly: true,
+      httpOnly: !isMobileWebView,
       secure: true,
       maxAge: sevenDays,
       sameSite: "none",
@@ -116,9 +116,9 @@ export const login = async (req, res) => {
 
     const payload = checkIfUserExists.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
-
+    const isMobileWebView = req.headers['user-agent']?.includes('TelegramWebApp');
     res.cookie("token", token, {
-      httpOnly: true,
+      httpOnly: !isMobileWebView,
       secure: true,
       maxAge: sevenDays,
       sameSite: true,
