@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Award, Mail, Leaf, TreePine, CalendarDays } from "lucide-react";
+import {
+  Award,
+  Mail,
+  Leaf,
+  TreePine,
+  CalendarDays,
+  Trash,
+  CircleAlert,
+} from "lucide-react";
 import axios from "axios";
 import { formatDistanceToNowStrict } from "date-fns";
 
@@ -199,11 +207,17 @@ const ProfilePage = () => {
                   className="flex items-center gap-4 p-3 rounded-lg bg-dark-color/50"
                 >
                   <div className="w-10 h-10 rounded-full bg-primary-green/20 flex items-center justify-center">
-                    <Leaf className="w-5 h-5 text-primary-green" />
+                    {item.activity_type == "tree_plant" ? (
+                      <Leaf className="w-5 h-5 text-primary-green" />
+                    ) : item.activity_type == "picked_litter" ? (
+                      <Trash className="w-5 h-5 text-primary-green" />
+                    ) : (
+                      <CircleAlert className="w-5 h-5 text-primary-green" />
+                    )}
                   </div>
                   <div>
                     <p className="text-white font-medium">
-                      {item.activity_type}: {item.comment || item.description}
+                      {item.comment || item.description}
                     </p>
                     <p className="text-sm text-gray-400">Earned 10 points</p>
                   </div>
