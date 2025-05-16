@@ -201,7 +201,7 @@ export const authTgMiniApp = async (req,res) => {
 
     const user = await db.query(`
       INSERT INTO users (username, avatar, email, telegram_id)
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4) RETURNING *
     `, [username, avatar, `Telegram: @${username}`, tgId])
     
     const payload = user.rows[0];
