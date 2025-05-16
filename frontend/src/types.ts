@@ -41,7 +41,7 @@ export interface TelegramUser {
   language_code?: string;
 }
 
-interface TelegramWebApp {
+export interface TelegramWebApp {
   initData: string;
   initDataUnsafe: {
     user?: TelegramUser;

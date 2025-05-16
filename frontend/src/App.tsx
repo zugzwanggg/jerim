@@ -18,48 +18,28 @@ axios.defaults.withCredentials = true;
 
 function App() {
   const dispatch = useAppDispatch();
-  const { isLogged, user } = useAppSelector((state) => state.user);
+  const { isLogged } = useAppSelector((state) => state.user);
 
-  const handleTelegramMiniApp = async () => {
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/api/telegram`,
-        {
-          tgId: window.Telegram?.WebApp.initDataUnsafe.user?.id,
-          username: window.Telegram?.WebApp.initDataUnsafe.user?.username,
-          avatar: window.Telegram?.WebApp.initDataUnsafe.user?.photo_url,
-        }
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const handleTelegramMiniApp = async (initData: TelegramWebApp) => {
+  //   try {
+  //     await axios.post(
+  //       `${import.meta.env.VITE_BACKEND_BASE_URL}/api/telegram`,
+  //       initData
+  //     );
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   useEffect(() => {
-    const initAuth = async () => {
-      console.log("initAuth called");
-    
-      if (window.Telegram?.WebApp) {
-        console.log("Telegram WebApp found");
-        window.Telegram.WebApp.ready();
-      } else {
-        console.warn("Telegram WebApp not ready");
-      }
-    
-      const userData = window.Telegram?.WebApp.initDataUnsafe?.user;
-      console.log("Telegram user data:", userData);
-    
-      if (userData && !user) {
-        console.log("Sending user data to backend...");
-        await handleTelegramMiniApp();
-      }
-    
-      console.log("Dispatching fetchUserIsLogged...");
-      dispatch(fetchUserIsLogged());
-      document.body.classList.add("dark");
-    };    
+    // const tg = window.Telegram?.WebApp.initDataUnsafe;
+
+    // if (!user && tg) {
+    //   handleTelegramMiniApp(tg);
+    // }
   
-    initAuth();
+    dispatch(fetchUserIsLogged());
+    document.body.classList.add("dark")
   }, []);
 
   return (
