@@ -1,9 +1,44 @@
-import UserCard from "@/components/UserCard"
-import { fakeUsers } from "@/constants/mockData"
-import { Trophy, Sparkles } from "lucide-react"
+import UserCard from "@/components/UserCard";
+import { fakeUsers } from "@/constants/mockData";
+import { Trophy, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router";
+
+// interface ILeaderboardUser {
+//   id: number | string;
+//   username: string;
+//   avatar: string;
+//   points: number | string;
+//   rank_num: number;
+// }
 
 const Leaderboard = () => {
-  const sortedUsers = [...fakeUsers].sort((a, b) => b.points - a.points);
+  // const sortedUsers = [...fakeUsers].sort((a, b) => b.points - a.points);
+  const [sortedUsers, setSortedUsers] = useState([]);
+  const fetchLeaderboard = async () => {
+    try {
+      const response = (
+        await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/leaderboard`
+        )
+      ).data;
+
+      console.log(response);
+      setSortedUsers(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      fetchLeaderboard();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
   const [firstPlace, secondPlace, thirdPlace, ...restUsers] = sortedUsers;
 
   return (
@@ -13,9 +48,13 @@ const Leaderboard = () => {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 bg-dark-secondary/50 px-6 py-3 rounded-full mb-4 backdrop-blur-sm border border-white/5">
             <Trophy className="w-6 h-6 text-yellow-500" />
-            <h1 className="text-2xl font-bold text-white">Global Leaderboard</h1>
+            <h1 className="text-2xl font-bold text-white">
+              Global Leaderboard
+            </h1>
           </div>
-          <p className="text-gray-400">Top contributors making Atyrau a cleaner place</p>
+          <p className="text-gray-400">
+            Top contributors making Atyrau a cleaner place
+          </p>
         </div>
 
         {/* Podium Section */}
@@ -32,10 +71,7 @@ const Leaderboard = () => {
                     </div>
                   </div>
                   <div className="bg-dark-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-800/50 group-hover:border-gray-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-gray-500/10 min-h-[140px] flex items-center">
-                    <UserCard 
-                      user={secondPlace} 
-                      rank={2}
-                    />
+                    <UserCard user={secondPlace} rank={2} />
                   </div>
                 </div>
               )}
@@ -52,10 +88,7 @@ const Leaderboard = () => {
                     </div>
                   </div>
                   <div className="bg-dark-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-yellow-500/20 group-hover:border-yellow-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/20 min-h-[150px] flex items-center">
-                    <UserCard 
-                      user={firstPlace} 
-                      rank={1}
-                    />
+                    <UserCard user={firstPlace} rank={1} />
                   </div>
                 </div>
               )}
@@ -72,10 +105,7 @@ const Leaderboard = () => {
                     </div>
                   </div>
                   <div className="bg-dark-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-amber-600/20 group-hover:border-amber-600/30 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 min-h-[140px] flex items-center">
-                    <UserCard 
-                      user={thirdPlace} 
-                      rank={3}
-                    />
+                    <UserCard user={thirdPlace} rank={3} />
                   </div>
                 </div>
               )}
@@ -93,10 +123,7 @@ const Leaderboard = () => {
             {restUsers.map((user, index) => (
               <div key={user.id} className="group">
                 <div className="bg-dark-secondary/80 backdrop-blur-sm rounded-xl p-4 border border-gray-800/50 group-hover:border-gray-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-gray-500/5">
-                  <UserCard 
-                    user={user} 
-                    rank={index + 4}
-                  />
+                  <UserCard user={user} rank={index + 4} />
                 </div>
               </div>
             ))}

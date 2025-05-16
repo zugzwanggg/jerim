@@ -1,4 +1,3 @@
-import { fakeUsers } from "@/constants/mockData";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Award, Mail, Leaf, TreePine, CalendarDays } from "lucide-react";
@@ -16,7 +15,6 @@ interface IUser {
 const ProfilePage = () => {
   const { id } = useParams();
   const userId = id ? parseInt(id) : null;
-  const user = userId ? fakeUsers.find((user) => user.id === userId) : null;
   const [userData, setUserData] = useState<null | IUser>(null);
   const [username, setUsername] = useState(userData?.username);
   const [avatar, setAvatar] = useState<string>("");
@@ -37,19 +35,23 @@ const ProfilePage = () => {
     try {
       const response: IUser = (
         await axios.get(
-          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}`
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${userId}`
         )
       ).data;
 
       const getPlants = (
         await axios.get(
-          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}/get_plants`
+          `${
+            import.meta.env.VITE_BACKEND_BASE_URL
+          }/api/user/${userId}/get_plants`
         )
       ).data;
 
       const getPosition = (
         await axios.get(
-          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}/leaderboard`
+          `${
+            import.meta.env.VITE_BACKEND_BASE_URL
+          }/api/user/${userId}/leaderboard`
         )
       ).data;
 
@@ -78,7 +80,7 @@ const ProfilePage = () => {
     fetch();
   }, []);
 
-  if (!user) {
+  if (!userId) {
     return (
       <div className="pt-32 md:pt-20 px-4 md:px-6">
         <h1 className="text-2xl font-bold text-white">User not found</h1>
