@@ -156,6 +156,22 @@ export const getLeaderboardPosition = async (req, res) => {
   }
 };
 
+export const getGlobalLeaderboard = async (req, res) => {
+  try {
+    const dbQuery = await db.query(
+      "SELECT id, username, avatar, points, RANK() OVER (ORDER BY points DESC) as rank_num FROM users ORDER BY points DESC LIMIT 100;"
+    );
+
+    return res.status(200).send(dbQuery.rows);
+  } catch (error) {
+    console.log(`Error at getGlobalLeaderboard(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};
+
 export const getRecentActivity = async (req, res) => {
   try {
     const { user_id } = req.params;
