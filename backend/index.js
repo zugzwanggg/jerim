@@ -12,22 +12,28 @@ const app = express();
 
 const allowedOrigins = [
   `${process.env.FRONTEND_BASE_URL}`,
-  'https://t.me',
   'https://web.telegram.org',
-  null
+  'https://telegram.org',
+  'https://*.telegram.org'
 ]
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || origin?.includes("web.telegram.org")) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+      if (!origin) return callback(null, true);
+        if (allowedOrigins.some(allowed => 
+          origin === allowed || 
+          origin.endsWith(`.${allowed}`) ||
+          origin.includes('web.telegram.org')
+        )) {
+          return callback(null, true);
+        }
+      
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
+    exposedHeaders: ['set-cookie']
   })
 );
 
