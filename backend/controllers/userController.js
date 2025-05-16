@@ -153,13 +153,23 @@ export const getRecentActivity = async (req, res) => {
     }
 
     const dbQuery = await db.query(
-      `
-      SELECT r.*, pl.*, p.* FROM reports r INNER JOIN picked_litters pl ON r.user_id=pl.user_id INNER JOIN plants p ON pl.user_id=p.user_id WHERE r.user_id=$1
-    `,
+      `WITH combined_activities AS (
+        SELECT id, user_id, comment, created_at, 'report' AS activity_type FROM reports WHERE user_id = $1
+        UNION ALL
+        SELECT id, user_id, description, created_at, 'picked_litter' AS activity_type FROM picked_litters WHERE user_id = $1
+        UNION ALL
+        SELECT id, user_id, comment, created_at, 'plant' AS activity_type FROM plants WHERE user_id = $1
+      )
+      SELECT id, user_id, comment, created_at, activity_type
+      FROM combined_activities
+      ORDER BY created_at DESC
+      LIMIT 3;`,
       [user_id]
     );
 
-    return res.status(200).send(dbQuery.fields);
+    return res.status(200).send({
+      response: dbQuery.rows,
+    });
   } catch (error) {
     console.log(`Error at getRecentActivity(): ${error}`);
     console.log(error);
