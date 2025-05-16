@@ -160,7 +160,7 @@ export const getRecentActivity = async (req, res) => {
         UNION ALL
         SELECT id, user_id, comment, created_at, reward, 'tree_plant' AS activity_type FROM plants WHERE user_id = $1
       )
-      SELECT id, user_id, comment, created_at, activity_type
+      SELECT id, user_id, comment, created_at, reward, activity_type
       FROM combined_activities
       ORDER BY created_at DESC
       LIMIT 3;`,
