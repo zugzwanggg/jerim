@@ -23,7 +23,11 @@ const UserCard = ({ user }: UserCardProps) => {
         <div
           className={`w-12 h-12 flex items-center justify-center rounded-full shadow-lg bg-gradient-to-br`}
         >
-          <img src={user.avatar} alt={user.username} className="rounded-full" />
+          <img
+            src={user.avatar}
+            alt={user.username}
+            className="w-12 h-12 rounded-full"
+          />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-lg text-white truncate">

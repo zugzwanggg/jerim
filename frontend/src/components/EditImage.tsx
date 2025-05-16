@@ -47,16 +47,16 @@ const EditImage = ({ setIsEdit, setImage, image, handleSave }: Props) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 z-30 flex items-center justify-end">
+    <div className="fixed inset-0 bg-black bg-opacity-20 z-30 flex items-center">
       <form
         onSubmit={handleSubmit}
-        className="bg-white dark:bg-darkColor h-full max-w-2xl w-full relative z-50 shadow-xl"
+        className="bg-white mx-auto dark:bg-darkColor h-full max-w-2xl w-full relative z-50 shadow-xl"
       >
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <button
             type="button"
             onClick={() => setIsEdit(false)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-darkSecondary rounded-full transition-colors"
+            className="p-2 text-dark-color hover:bg-gray-100 rounded-full transition-colors"
           >
             <X size={24} />
           </button>
