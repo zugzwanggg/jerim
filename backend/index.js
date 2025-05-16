@@ -10,16 +10,23 @@ import { aiRouter } from "./routes/aiRoutes.js";
 
 const app = express();
 
+const allowedOrigins = [
+  `${process.env.FRONTEND_BASE_URL}`,
+  'https://t.me',
+  'https://web.telegram.org',
+  null
+]
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: 
-    [
-      `${process.env.FRONTEND_BASE_URL}`,
-      'https://t.me',
-      'https://web.telegram.org'
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
