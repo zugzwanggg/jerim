@@ -37,13 +37,27 @@ function App() {
 
   useEffect(() => {
     const initAuth = async () => {
-      if (!user && window.Telegram?.WebApp.initDataUnsafe.user) {
+      console.log("initAuth called");
+    
+      if (window.Telegram?.WebApp) {
+        console.log("Telegram WebApp found");
+        window.Telegram.WebApp.ready();
+      } else {
+        console.warn("Telegram WebApp not ready");
+      }
+    
+      const userData = window.Telegram?.WebApp.initDataUnsafe?.user;
+      console.log("Telegram user data:", userData);
+    
+      if (userData && !user) {
+        console.log("Sending user data to backend...");
         await handleTelegramMiniApp();
       }
-  
-      dispatch(fetchUserIsLogged()); 
+    
+      console.log("Dispatching fetchUserIsLogged...");
+      dispatch(fetchUserIsLogged());
       document.body.classList.add("dark");
-    };
+    };    
   
     initAuth();
   }, []);
