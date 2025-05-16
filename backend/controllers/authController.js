@@ -64,9 +64,10 @@ export const register = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
+      secure: true,
       maxAge: sevenDays,
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      sameSite: "none",
+      path: "/"
     });
 
     return res.status(200).send({
@@ -118,9 +119,10 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
+      secure: true,
       maxAge: sevenDays,
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      sameSite: true,
+      path: "/"
     });
 
     return res.status(200).send({
@@ -139,9 +141,10 @@ export const logout = async (req, res) => {
   return res
     .cookie("token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       maxAge: new Date(0),
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      sameSite: "none",
+      path: "/"
     })
     .status(200)
     .send({
