@@ -61,13 +61,14 @@ export const register = async (req, res) => {
 
     const payload = newUser.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
-    const isMobileWebView = req.headers['user-agent']?.includes('TelegramWebApp');
+    const isMobileWebView =
+      req.headers["user-agent"]?.includes("TelegramWebApp");
     res.cookie("token", token, {
       httpOnly: !isMobileWebView,
       secure: true,
       maxAge: sevenDays,
       sameSite: "none",
-      path: "/"
+      path: "/",
     });
 
     return res.status(200).send({
@@ -116,13 +117,14 @@ export const login = async (req, res) => {
 
     const payload = checkIfUserExists.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
-    const isMobileWebView = req.headers['user-agent']?.includes('TelegramWebApp');
+    const isMobileWebView =
+      req.headers["user-agent"]?.includes("TelegramWebApp");
     res.cookie("token", token, {
       httpOnly: !isMobileWebView,
       secure: true,
       maxAge: sevenDays,
       sameSite: true,
-      path: "/"
+      path: "/",
     });
 
     return res.status(200).send({
@@ -144,11 +146,12 @@ export const logout = async (req, res) => {
       secure: true,
       maxAge: new Date(0),
       sameSite: "none",
-      path: "/"
+      path: "/",
     })
     .status(200)
     .send({
-      message: "Logged out succesfully",
+      isLogged: false,
+      user: {},
     });
 };
 
