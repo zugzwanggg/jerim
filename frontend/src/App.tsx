@@ -36,11 +36,16 @@ function App() {
   };
 
   useEffect(() => {
-    if (!user && window.Telegram?.WebApp.initDataUnsafe.user) {
-      handleTelegramMiniApp();
-    }
-    dispatch(fetchUserIsLogged());
-    document.body.classList.add("dark");
+    const initAuth = async () => {
+      if (!user && window.Telegram?.WebApp.initDataUnsafe.user) {
+        await handleTelegramMiniApp();
+      }
+  
+      dispatch(fetchUserIsLogged()); 
+      document.body.classList.add("dark");
+    };
+  
+    initAuth();
   }, []);
 
   return (
