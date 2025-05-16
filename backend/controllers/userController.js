@@ -111,3 +111,74 @@ export const editAvatar = async (req, res) => {
     });
   }
 };
+
+export const getUserPlants = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return res.status(400).send({
+        error_message: "Must provide user_id",
+      });
+    }
+
+    const dbQuery = await db.query(
+      "SELECT COUNT(*) FROM plants WHERE user_id=$1",
+      [user_id]
+    );
+
+    return res.status(200).send(dbQuery.rows[0]);
+  } catch (error) {
+    console.log(`Error at getUserPlants(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};
+
+export const getLeaderboardPosition = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const dbQuery = await db.query(
+      "SELECT rank_num FROM (SELECT id, RANK() OVER (ORDER BY points DESC) AS rank_num FROM users) AS ranked_users WHERE id=$1",
+      [user_id]
+    );
+
+    return res.status(200).send(dbQuery.rows[0]);
+  } catch (error) {
+    console.log(`Error at getLeaderboardPosition(): ${error}`);
+    console.log(error);
+    return res.status(200).send({
+      error,
+    });
+  }
+};
+
+export const getRecentActivity = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return res.status(400).send({
+        error_message: "Must provide user_id",
+      });
+    }
+
+    const dbQuery = await db.query(
+      `
+      SELECT r.*, pl.*, p.* FROM reports r INNER JOIN picked_litters pl ON r.user_id=pl.user_id INNER JOIN plants p ON pl.user_id=p.user_id WHERE r.user_id=$1
+    `,
+      [user_id]
+    );
+
+    return res.status(200).send(dbQuery.fields);
+  } catch (error) {
+    console.log(`Error at getRecentActivity(): ${error}`);
+    console.log(error);
+    return res.status(500).send({
+      error,
+    });
+  }
+};

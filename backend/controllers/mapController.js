@@ -6,7 +6,8 @@ export const getNearestCityData = async (req, res) => {
   try {
     const key = process.env.AIRVISUAL_API_KEY;
     const result = await axios.get(
-      "https://api.airvisual.com/v2/nearest_city?lat=47.1167&lon=51.8833&key=" + key
+      "https://api.airvisual.com/v2/nearest_city?lat=47.1167&lon=51.8833&key=" +
+        key
     );
 
     res.status(200).json(result.data);
@@ -126,12 +127,22 @@ export const pickLitter = async (req, res) => {
 export const plantATree = async (req, res) => {
   try {
     const { id } = req.user;
-    const { lat, lng, comment } = req.body;
+    let { lat, lng } = req.body;
+    const { comment } = req.body;
     const image = req.file;
+
     if (!lat || !lng) {
       return res.status(400).json({
         message: "Fill all the fields",
       });
+    }
+
+    if (typeof lat == "string") {
+      lat = parseFloat(lat);
+    }
+
+    if (typeof lng == "string") {
+      lng = parseFloat(lng);
     }
 
     if (!image) {
@@ -158,9 +169,7 @@ export const plantATree = async (req, res) => {
     );
 
     await db.query(
-      `INSERT INTO picked_litters (user_id, lat, lng, image, comment)
-       VALUES ($1, $2, $3, $3, $5)
-      `,
+      `INSERT INTO plants (user_id, lat, lng, image, comment) VALUES ($1, $2, $3, $4, $5)`,
       [id, lat, lng, imageUrl, comment]
     );
 

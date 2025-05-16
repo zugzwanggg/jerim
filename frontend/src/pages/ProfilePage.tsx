@@ -1,7 +1,7 @@
 import { fakeUsers } from "@/constants/mockData";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Award, MapPin, Mail, Leaf, TreePine } from "lucide-react";
+import { Award, Mail, Leaf, TreePine, CalendarDays } from "lucide-react";
 import axios from "axios";
 
 interface IUser {
@@ -9,7 +9,8 @@ interface IUser {
   username: string;
   email: string;
   avatar: string;
-  created_at: Date;
+  created_at: string;
+  points: number;
 }
 
 const ProfilePage = () => {
@@ -20,6 +21,17 @@ const ProfilePage = () => {
   const [username, setUsername] = useState(userData?.username);
   const [avatar, setAvatar] = useState<string>("");
   const [email, setEmail] = useState(userData?.email);
+  const [createdAt, setCreatedAt] = useState<Date | undefined>(undefined);
+  const [points, setPoints] = useState<number>(0);
+  const [plants, setPlants] = useState<number>(0);
+  const [position, setPosition] = useState<number>(0);
+
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
 
   const fetchUserData = async () => {
     try {
@@ -29,10 +41,26 @@ const ProfilePage = () => {
         )
       ).data;
 
+      const getPlants = (
+        await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}/get_plants`
+        )
+      ).data;
+
+      const getPosition = (
+        await axios.get(
+          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}/leaderboard`
+        )
+      ).data;
+
       setUserData(response);
       setUsername(response?.username);
       setAvatar(response.avatar);
       setEmail(response?.email);
+      setCreatedAt(new Date(response.created_at));
+      setPoints(response?.points);
+      setPlants(getPlants?.count);
+      setPosition(getPosition?.rank_num);
     } catch (error) {
       console.log(error);
     }
@@ -78,16 +106,18 @@ const ProfilePage = () => {
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-bold text-white mb-2">{username}</h1>
-              <p className="text-gray-300 mb-4">{user.bio}</p>
 
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-400">
+              <div className="flex flex-wrap flex-col md:justify-start gap-4 text-sm text-gray-400">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   <span>{email}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>Atyrau, Kazakhstan</span>
+                  <CalendarDays className="w-4 h-4" />
+                  <span>
+                    Member since:{" "}
+                    {createdAt ? formatDate(createdAt) : "Unknown"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -102,10 +132,10 @@ const ProfilePage = () => {
               <h3 className="text-xl font-semibold text-white">Points</h3>
             </div>
             <p className="text-3xl font-bold text-white">
-              {user.points.toLocaleString()}
+              {points !== null ? points : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              Total contribution points
+              Total Contribution Points
             </p>
           </div>
 
@@ -117,10 +147,10 @@ const ProfilePage = () => {
               </h3>
             </div>
             <p className="text-3xl font-bold text-white">
-              {(user.points / 10).toLocaleString()}
+              {plants !== null ? plants : "N/A"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              Trees planted through contributions
+              Trees Planted Through Contributions
             </p>
           </div>
 
@@ -129,9 +159,9 @@ const ProfilePage = () => {
               <Award className="w-6 h-6 text-primary-green" />
               <h3 className="text-xl font-semibold text-white">Rank</h3>
             </div>
-            <p className="text-3xl font-bold text-white">#{user.id}</p>
+            <p className="text-3xl font-bold text-white">#{position}</p>
             <p className="text-sm text-gray-400 mt-1">
-              Current leaderboard position
+              Current Global Leaderboard Position
             </p>
           </div>
         </div>

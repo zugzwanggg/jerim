@@ -2,7 +2,10 @@ import { Router } from "express";
 import {
   editAvatar,
   editUsername,
+  getLeaderboardPosition,
+  getRecentActivity,
   getUserByID,
+  getUserPlants,
 } from "../controllers/userController.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 import { uploadImage } from "../middleware/uploadImage.js";
@@ -17,3 +20,6 @@ userRouter.patch(
   uploadImage.single("avatar"),
   editAvatar
 );
+userRouter.get("/user/:user_id/recent_activity", getRecentActivity);
+userRouter.get("/user/:user_id/get_plants", getUserPlants);
+userRouter.get("/user/:user_id/leaderboard", getLeaderboardPosition);
