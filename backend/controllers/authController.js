@@ -150,7 +150,6 @@ export const logout = async (req, res) => {
     })
     .status(200)
     .send({
-      isLogged: false,
       user: {},
     });
 };
