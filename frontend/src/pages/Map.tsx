@@ -1,8 +1,8 @@
-import MapWithControls from "@/components/LocatonMap"
 import axios from "axios";
 import { Leaf, Info } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { ViewMap } from "@/components/map/ViewMap";
 
 const Map = () => {
   const { isMobile } = useWindowSize();
@@ -34,7 +34,7 @@ const Map = () => {
           <div className="lg:col-span-2">
             <div className="bg-dark-secondary rounded-xl p-4 shadow-lg">
               <div className={`${isMobile ? 'h-[400px]' : 'h-[600px]'} rounded-lg overflow-hidden`}>
-                <MapWithControls predefinedLocations={reports} />
+                <ViewMap predefinedLocations={reports} />
               </div>
             </div>
           </div>

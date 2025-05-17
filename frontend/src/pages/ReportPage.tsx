@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { MapPin, AlertTriangle, Loader2 } from "lucide-react";
-import MapWithControls from "@/components/LocatonMap";
 import L from 'leaflet';
 import axios from "axios";
+import { ReportMap } from "@/components/map/ReportMap";
 
 // const COMMON_BRANDS = [
 //   "Coca-Cola",
@@ -79,9 +79,8 @@ const ReportPage = () => {
               Select Location
             </h2>
             <div className="h-[300px] rounded-lg overflow-hidden">
-              <MapWithControls 
+              <ReportMap 
                 onLocationSelect={setSelectedLocation} 
-                mode="report"
                 selectedLocation={selectedLocation}
               />
             </div>

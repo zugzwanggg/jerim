@@ -2,6 +2,7 @@ import { HomeIcon, Trees, Cloud, Wind, Thermometer, Droplets } from "lucide-reac
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { IPollutionData, IWeatherData } from "@/types";
+import { Link } from "react-router-dom";
 
 const Home = () => { 
   const [city, setCity] = useState<string>('');
@@ -37,9 +38,9 @@ const Home = () => {
         <div className="max-w-lg ml-0 md:ml-28 mt-20 md:mt-28">
           <h2 className="text-white text-center md:text-left font-bold text-4xl md:text-5xl mb-4">Help the planet, Navigate with JERIM</h2>
           <p className="text-gray-300 text-2xl text-center md:text-left mb-8">Make the switch to the greenest map navigator on the planet</p>
-          <button className="bg-primary-green block mx-auto md:mx-0 text-black font-bold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all">
+          <Link to={`/map`} className="bg-primary-green md:mx-0 text-black font-bold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all">
             Get Started
-          </button>
+          </Link>
 
           {/* addidtional info */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-dark-color border border-zinc-500 rounded-lg p-4 mt-8">

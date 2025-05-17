@@ -13,6 +13,7 @@ import SearchPage from "./pages/SearchPage";
 import { fetchUserIsLogged } from "./features/userSlice/userSlice";
 import { useAppDispatch, useAppSelector } from "./hooks/hooks";
 import axios from "axios";
+import Rewards from "./pages/Rewards";
 
 axios.defaults.withCredentials = true;
 
@@ -51,6 +52,7 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/report" element={<ReportPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/rewards" element={<Rewards />}/>
 
           <Route path="/profile/:id" element={<ProfilePage />} />
         </Route>

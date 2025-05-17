@@ -2,8 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Locate, Loader2, XCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Locate, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 
@@ -15,7 +14,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom red marker icon
 const redIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -24,22 +22,6 @@ const redIcon = new L.Icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
 });
-
-export interface Coordinates {
-  id: number;
-  lat: string;
-  lng: string;
-  comment?: string;
-  user_id: number;
-  created_at?: string;
-}
-
-interface MapWithControlsProps {
-  onLocationSelect?: (coordinates: L.LatLng) => void;
-  predefinedLocations?: Coordinates[];
-  mode?: 'navigation' | 'report';
-  selectedLocation?: L.LatLng | null;
-}
 
 const LocationMarker = () => {
   const [position, setPosition] = useState<L.LatLng | null>(null);
@@ -52,39 +34,19 @@ const LocationMarker = () => {
 
   return position === null ? null : (
     <Marker position={position}>
-      <Popup className="font-medium">
-        📍 Your current location
-      </Popup>
+      <Popup className="font-medium">📍 Your current location</Popup>
     </Marker>
   );
 };
 
-const MapClickHandler = ({ onLocationSelect, mode }: { onLocationSelect?: (coordinates: L.LatLng) => void, mode: 'navigation' | 'report' }) => {
-  useMapEvents({
-    click(e) {
-      if (mode === 'report') {
-        onLocationSelect?.(e.latlng);
-      }
-    }
-  });
-  return null;
-};
-
-const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'navigation', selectedLocation }: MapWithControlsProps) => {
+export const ViewMap = ({ predefinedLocations = [] }: { predefinedLocations: any[] }) => {
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<L.LatLng | null>(selectedLocation || null);
-  const [markers, setMarkers] = useState<Array<{
-    position: L.LatLng;
-    description?: string;
-    username?: string;
-    created_at?: string;
-    user_id: number;
-  }>>([]);
+  const [markers, setMarkers] = useState<any[]>([]);
 
   const ATYRAU_BOUNDS = L.latLngBounds(
-    L.latLng(47.0, 51.7),  
-    L.latLng(47.2, 52.0) 
+    L.latLng(47.0, 51.7),
+    L.latLng(47.2, 52.0)
   );
 
   const handleLocate = useCallback(() => {
@@ -99,30 +61,15 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
     });
   }, [mapInstance]);
 
-  const handleLocationSelect = useCallback((latlng: L.LatLng) => {
-    if (mode === 'report' && !ATYRAU_BOUNDS.contains(latlng)) {
-      toast.error('Please select a location within Atyrau city boundaries.');
-      return;
-    }
-    setSelectedPoint(latlng);
-    onLocationSelect?.(latlng);
-  }, [onLocationSelect, mode]);
-
   const getUser = async (id: number) => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/${id}`);
-      return res.data.username; 
+      return res.data.username;
     } catch (error) {
       console.log(error);
       return 'Unknown User';
     }
-  }
-
-  // useEffect(() => {
-  //   if (!selectedPoint) {
-  //     return null;
-  //   }
-  // }, [selectedPoint])
+  };
 
   useEffect(() => {
     const fetchMarkerData = async () => {
@@ -147,7 +94,7 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
   return (
     <div className="relative z-10 h-full w-full rounded-xl overflow-hidden border-2 border-gray-200">
       <MapContainer
-        center={[47.1167, 51.8833]} // Atyrau coordinates
+        center={[47.1167, 51.8833]}
         zoom={13}
         scrollWheelZoom={true}
         className="h-full w-full"
@@ -160,30 +107,9 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <LocationMarker />
-        <MapClickHandler onLocationSelect={handleLocationSelect} mode={mode} />
-
-        {mode === 'report' && selectedPoint && (
-          <Marker 
-            position={selectedPoint}
-            icon={redIcon}
-          >
-            <Popup className="font-medium">
-              <div className="p-1">
-                <p className="font-semibold text-gray-800">Selected Location</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Click "Submit Report" to report this area
-                </p>
-              </div>
-            </Popup>
-          </Marker>
-        )}
 
         {markers.map((location, index) => (
-          <Marker 
-            key={`location-${index}`}
-            position={location.position}
-            icon={redIcon}
-          >
+          <Marker key={`location-${index}`} position={location.position} icon={redIcon}>
             <Popup className="font-medium">
               <div className="p-1.5 md:p-2 min-w-[200px] md:min-w-[250px]">
                 <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-3 pb-1.5 md:pb-2 border-b border-gray-200">
@@ -234,8 +160,7 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
         ))}
       </MapContainer>
 
-      {/* Locate button */}
-      <div className="absolute z-[1000] bottom-4 right-4 flex flex-col gap-2">
+      <div className="absolute z-[1000] bottom-4 right-4">
         <button
           onClick={handleLocate}
           disabled={isLocating}
@@ -253,22 +178,7 @@ const MapWithControls = ({ onLocationSelect, predefinedLocations = [], mode = 'n
             </>
           )}
         </button>
-
-        {mode === 'report' && selectedPoint && (
-          <button
-            onClick={() => {
-              setSelectedPoint(null);
-              onLocationSelect?.(selectedPoint);
-            }}
-            className="bg-red-100 px-4 py-2 rounded-lg shadow-md hover:bg-red-200 transition-colors flex items-center gap-2 text-sm font-medium text-red-800"
-          >
-            <XCircle className="h-5 w-5" />
-            Clear Selection
-          </button>
-        )}
       </div>
     </div>
   );
 };
-
-export default MapWithControls;
