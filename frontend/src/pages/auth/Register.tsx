@@ -37,7 +37,7 @@ const Register = () => {
             let errorMessage
 
             if (axios.isAxiosError(err)) {
-                errorMessage = err.response?.data?.message;
+                errorMessage = err.response?.data?.error_message;
             } else if (err instanceof Error) {
                 errorMessage = err.message
             }

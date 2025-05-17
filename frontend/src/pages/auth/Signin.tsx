@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ArrowLeft, Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Link} from "react-router-dom";
 // import toast from "react-hot-toast";
 
@@ -29,8 +30,18 @@ const Signin = () => {
 
           window.location.reload();
           
-        } catch (error) {
-          console.log(error);
+        } catch (err) {
+          console.log(err);
+
+          let errorMessage
+
+            if (axios.isAxiosError(err)) {
+                errorMessage = err.response?.data?.error_message;
+            } else if (err instanceof Error) {
+                errorMessage = err.message
+            }
+            toast.error(errorMessage)
+
         }
     };
 
