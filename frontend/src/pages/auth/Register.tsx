@@ -152,14 +152,6 @@ const Register = () => {
                         </button>
                     </div>
 
-                    <Link
-                        to={`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/google`}
-                        className="p-1.5 px-4 flex items-center justify-center gap-2 border rounded-full font-semibold text-black"
-                    >
-                        <img src="/google-icon.svg" alt="google" width={18} />
-                        <span>Register with Google</span>
-                    </Link>
-
                     <p className="text-center text-sm text-black">Already have an account? <Link to="/auth/signin" className="text-primary-green hover:underline">Sign in here</Link></p>
                 </form>
             </div>

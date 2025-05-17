@@ -38,7 +38,7 @@ const Home = () => {
         <div className="max-w-lg ml-0 md:ml-28 mt-20 md:mt-28">
           <h2 className="text-white text-center md:text-left font-bold text-4xl md:text-5xl mb-4">Help the planet, Navigate with JERIM</h2>
           <p className="text-gray-300 text-2xl text-center md:text-left mb-8">Make the switch to the greenest map navigator on the planet</p>
-          <Link to={`/map`} className="bg-primary-green md:mx-0 text-black font-bold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all">
+          <Link to={`/map`} className="bg-primary-green max-w-[150px] block mx-auto md:mx-0 text-black font-bold px-6 py-3 rounded-full hover:bg-opacity-90 transition-all">
             Get Started
           </Link>
 

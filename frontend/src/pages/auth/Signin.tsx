@@ -109,14 +109,6 @@ const Signin = () => {
                         </button>
                     </div>
 
-                    <Link
-                        to={`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/google`}
-                        className="p-1.5 px-4 flex items-center justify-center gap-2 border rounded-full font-semibold text-black"
-                    >
-                        <img src="/google-icon.svg" alt="google" width={18} />
-                        <span>Sign in with Google</span>
-                    </Link>
-
                     <p className="text-center text-sm text-black">Don't have an account? <Link to="/auth/register" className="text-primary-green hover:underline">Register here</Link></p>
                 </form>
             </div>
