@@ -20,20 +20,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-        if (allowedOrigins.some(allowed => 
-          origin === allowed || 
-          origin.endsWith(`.${allowed}`) ||
-          origin.includes('web.telegram.org')
-        )) {
-          return callback(null, true);
-        }
-      
-      return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    exposedHeaders: ['set-cookie']
+    origin: allowedOrigins,
+    credentials: true
   })
 );
 
