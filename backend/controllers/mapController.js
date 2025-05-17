@@ -60,9 +60,11 @@ export const sendReport = async (req, res) => {
     }
 
     await db.query(
-      "INSERT INTO reports (user_id, lat, lng, comment) VALUES ($1, $2, $3, $4)",
+      "INSERT INTO reports (user_id, lat, lng, comment, reward) VALUES ($1, $2, $3, $4, 10)",
       [id, lat, lng, comment]
     );
+
+    await db.query("UPDATE users SET points=points+10 WHERE id=$1", [id]);
 
     res.status(200).json({
       message: "Report submited succesfully",
