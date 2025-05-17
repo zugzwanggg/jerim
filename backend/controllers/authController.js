@@ -61,14 +61,12 @@ export const register = async (req, res) => {
 
     const payload = newUser.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
-    const isMobileWebView =
-      req.headers["user-agent"]?.includes("TelegramWebApp");
+
     res.cookie("token", token, {
-      httpOnly: !isMobileWebView,
-      secure: true,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
       maxAge: sevenDays,
-      sameSite: "none",
-      path: "/",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
     return res.status(200).send({
@@ -117,14 +115,12 @@ export const login = async (req, res) => {
 
     const payload = checkIfUserExists.rows[0];
     const token = jwt.sign(payload, JWT_SECRET);
-    const isMobileWebView =
-      req.headers["user-agent"]?.includes("TelegramWebApp");
+
     res.cookie("token", token, {
-      httpOnly: !isMobileWebView,
-      secure: true,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
       maxAge: sevenDays,
-      sameSite: true,
-      path: "/",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
     return res.status(200).send({
@@ -143,10 +139,9 @@ export const logout = async (req, res) => {
   return res
     .cookie("token", "", {
       httpOnly: true,
-      secure: true,
-      maxAge: new Date(0),
-      sameSite: "none",
-      path: "/",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      maxAge: sevenDays,
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     })
     .status(200)
     .send({
